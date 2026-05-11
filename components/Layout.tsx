@@ -65,9 +65,15 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate, hide
         const currency = stored.currency || 'RUB';
         const paymentDeadline = Number(stored.paymentDeadline);
         const waitDeadline = Number(stored.waitDeadline);
+        const now = Date.now();
+
         if (stored.status === 'awaiting_payment' && Number.isFinite(paymentDeadline) && paymentDeadline > 0) {
-          const now = Date.now();
           const left = Math.max(0, Math.floor((paymentDeadline - now) / 1000));
+          if (left <= 0) {
+            window.localStorage.removeItem(STORAGE_KEY);
+            setP2pSummary(null);
+            return;
+          }
           setP2pSummary({
             amount,
             currency,
@@ -75,8 +81,12 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate, hide
             timeLeft: left,
           });
         } else {
-          const now = Date.now();
           const left = Number.isFinite(waitDeadline) && waitDeadline > 0 ? Math.max(0, Math.floor((waitDeadline - now) / 1000)) : undefined;
+          if (left !== undefined && left <= 0) {
+            window.localStorage.removeItem(STORAGE_KEY);
+            setP2pSummary(null);
+            return;
+          }
           setP2pSummary({
             amount,
             currency,

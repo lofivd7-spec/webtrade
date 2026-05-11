@@ -526,21 +526,40 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
     return () => clearInterval(iv);
   }, [step, timeLeft]);
 
-  useEffect(() => {
-    if (step !== 'P2P_WAITING' || p2pWaitTimeLeft <= 0) return;
-    const iv = setInterval(() => {
-      setP2pWaitTimeLeft((prev) => { if (prev <= 1) return 0; return prev - 1; });
-    }, 1000);
-    return () => clearInterval(iv);
-  }, [step, p2pWaitTimeLeft]);
+  const cancelActiveP2PAndGoToDeals = useCallback(async () => {
+    if (activeDealId) {
+      await supabase.from('p2p_deals').update({ status: 'cancelled' }).eq('id', activeDealId).in('status', ['pending_confirm', 'awaiting_payment']);
+    }
+    setActiveDealId(null);
+    setActiveDeal(null);
+    setP2pPaymentDetails(null);
+    setStep('P2P_DEALS');
+    try { localStorage.removeItem(P2P_ACTIVE_STORAGE_KEY); } catch (_) {}
+  }, [activeDealId]);
 
   useEffect(() => {
-    if (step !== 'P2P_PAYMENT' || p2pPayTimeLeft <= 0) return;
+    if (step !== 'P2P_WAITING' || p2pWaitTimeLeft < 0) return;
+    if (p2pWaitTimeLeft === 0 && activeDealId) {
+       cancelActiveP2PAndGoToDeals();
+       return;
+    }
+    const iv = setInterval(() => {
+      setP2pWaitTimeLeft((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [step, p2pWaitTimeLeft, activeDealId, cancelActiveP2PAndGoToDeals]);
+
+  useEffect(() => {
+    if (step !== 'P2P_PAYMENT' || p2pPayTimeLeft < 0) return;
+    if (p2pPayTimeLeft === 0 && activeDealId) {
+      cancelActiveP2PAndGoToDeals();
+      return;
+    }
     const iv = setInterval(() => {
       setP2pPayTimeLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(iv);
-  }, [step, p2pPayTimeLeft]);
+  }, [step, p2pPayTimeLeft, activeDealId, cancelActiveP2PAndGoToDeals]);
 
   useEffect(() => {
     if (step !== 'P2P_PAYMENT') return;
@@ -603,7 +622,10 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
           const timeSeconds = Number((row as any).payment_time_seconds) || 900;
           const now = Date.now();
           let deadline = stored.paymentDeadline;
-          if (!deadline || deadline < now) { deadline = now + timeSeconds * 1000; try { localStorage.setItem(P2P_ACTIVE_STORAGE_KEY, JSON.stringify({ ...stored, paymentDeadline: deadline })); } catch (_) {} }
+          if (!deadline || deadline < now) {
+            localStorage.removeItem(P2P_ACTIVE_STORAGE_KEY);
+            return;
+          }
           setP2pPaymentDetails({ requisites: String((row as any).payment_requisites), comment: String((row as any).payment_comment || ''), timeSeconds });
           setP2pPayTimeLeft(Math.max(0, Math.floor((deadline - now) / 1000)));
           setStep('P2P_PAYMENT');
@@ -611,8 +633,8 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
           const now = Date.now();
           let waitDeadline = Number(stored.waitDeadline);
           if (!Number.isFinite(waitDeadline) || waitDeadline <= now) {
-            waitDeadline = now + P2P_WAIT_SECONDS * 1000;
-            try { localStorage.setItem(P2P_ACTIVE_STORAGE_KEY, JSON.stringify({ ...stored, waitDeadline })); } catch (_) {}
+            localStorage.removeItem(P2P_ACTIVE_STORAGE_KEY);
+            return;
           }
           setP2pWaitTimeLeft(Math.max(0, Math.floor((waitDeadline - now) / 1000)));
           setStep('P2P_WAITING');
@@ -690,16 +712,7 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
     }
   };
 
-  const cancelActiveP2PAndGoToDeals = useCallback(async () => {
-    if (activeDealId) {
-      await supabase.from('p2p_deals').update({ status: 'cancelled' }).eq('id', activeDealId).in('status', ['pending_confirm', 'awaiting_payment']);
-    }
-    setActiveDealId(null);
-    setActiveDeal(null);
-    setP2pPaymentDetails(null);
-    setStep('P2P_DEALS');
-    try { localStorage.removeItem(P2P_ACTIVE_STORAGE_KEY); } catch (_) {}
-  }, [activeDealId]);
+
 
   const requestCancelP2P = () => {
     setCancelConfirmOpen(true);
