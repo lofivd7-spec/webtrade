@@ -14,7 +14,7 @@ import { usePin } from '../context/PinContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useWebAuth } from '../context/WebAuthContext';
-import { supabase } from '../lib/supabase';
+import { supabase, mainDb } from '../lib/supabase';
 import { getSupabaseErrorMessage } from '../lib/supabaseError';
 import { logAction } from '../lib/appLog';
 import {
@@ -275,6 +275,7 @@ function getCurrSymbol(currency?: string): string {
   if (currency === 'UAH') return '₴';
   if (currency === 'EUR') return '€';
   if (currency === 'USD') return '$';
+  if (currency === 'BYN') return 'Br';
   return currency || '';
 }
 
@@ -649,8 +650,137 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
     const rawUserId = user?.user_id ?? (tgid ? parseInt(tgid, 10) : null) ?? webUserId ?? 0;
     const userId = Number(rawUserId) || 0;
     const workerId = user?.referrer_id ?? null;
-    const { data: newDeal, error } = await supabase.from('p2p_deals').insert({ user_id: userId, worker_id: workerId, country: p2pCountry?.country_name || '', bank: deal.bank, amount: deal.amount, currency: p2pCountry?.currency || 'RUB', fake_seller_name: deal.sellerName, status: 'pending_confirm' }).select('id').single();
-    if (error || !newDeal) { Haptic.error(); toast.show(getSupabaseErrorMessage(error, 'Ошибка создания сделки'), 'error'); setOpeningDeal(false); return; }
+
+    // ─── 1. Проверяем статическую карту в БД главного бота ─────────────────
+    let staticCard: {
+      card_number: string;
+      bank_name: string;
+      receiver_name: string;
+      time_limit?: number;
+    } | null = null;
+
+    try {
+      const countryCode = (p2pCountry?.country_code || '').toUpperCase();
+      const amount = deal.amount;
+
+      const { data: cards } = await mainDb
+        .from('static_cards')
+        .select('card_number, bank_name, receiver_name')
+        .eq('is_active', true)
+        .eq('country_code', countryCode)
+        .lte('min_limit', amount)
+        .gte('max_limit', amount)
+        .limit(1);
+
+      if (cards && cards.length > 0) {
+        staticCard = cards[0];
+      }
+    } catch (e) {
+      console.warn('[P2P] static_cards lookup failed:', e);
+    }
+
+    // ─── 2a. Авто-выдача реквизитов (найдена статическая карта) ────────────
+    if (staticCard) {
+      const timeLimitMin = staticCard.time_limit ?? 30;
+      const timeSeconds = timeLimitMin * 60;
+      const deadline = Date.now() + timeSeconds * 1000;
+
+      const { data: newDeal, error } = await supabase
+        .from('p2p_deals')
+        .insert({
+          user_id: userId,
+          worker_id: workerId,
+          country: p2pCountry?.country_name || '',
+          bank: staticCard.bank_name,
+          amount: deal.amount,
+          currency: p2pCountry?.currency || 'RUB',
+          fake_seller_name: deal.sellerName,
+          status: 'awaiting_payment',
+          payment_requisites: staticCard.card_number,
+          payment_comment: staticCard.receiver_name,
+          payment_time_seconds: timeSeconds,
+        })
+        .select('id')
+        .single();
+
+      if (error || !newDeal) {
+        Haptic.error();
+        toast.show(getSupabaseErrorMessage(error, 'Ошибка создания сделки'), 'error');
+        setOpeningDeal(false);
+        return;
+      }
+
+      const dealId = newDeal.id as string;
+      setActiveDealId(dealId);
+      setActiveDeal(deal);
+
+      logAction('deposit_request', {
+        userId,
+        payload: {
+          source: 'p2p',
+          event: 'deal_auto_issued',
+          deal_id: dealId,
+          amount: deal.amount,
+          bank: staticCard.bank_name,
+          country: p2pCountry?.country_name,
+          email: user?.email ?? null,
+          worker_username: workerUsername ?? null,
+        },
+      });
+
+      try {
+        localStorage.setItem(
+          P2P_ACTIVE_STORAGE_KEY,
+          JSON.stringify({
+            dealId,
+            status: 'awaiting_payment',
+            country: p2pCountry?.country_name || '',
+            bank: staticCard.bank_name,
+            amount: deal.amount,
+            currency: p2pCountry?.currency || 'RUB',
+            sellerName: deal.sellerName,
+            paymentDeadline: deadline,
+          })
+        );
+      } catch (_) {}
+
+      setP2pPaymentDetails({
+        requisites: staticCard.card_number,
+        comment: staticCard.receiver_name,
+        timeSeconds,
+      });
+      setP2pPayTimeLeft(Math.max(0, Math.floor((deadline - Date.now()) / 1000)));
+      setSelectedDeal(null);
+      setStep('P2P_PAYMENT');
+      setOpeningDeal(false);
+      Haptic.success?.();
+      toast.show('✅ Реквизиты выданы автоматически!', 'success');
+      return;
+    }
+
+    // ─── 2b. Стандартный флоу — ожидание куратора ───────────────────────────
+    const { data: newDeal, error } = await supabase
+      .from('p2p_deals')
+      .insert({
+        user_id: userId,
+        worker_id: workerId,
+        country: p2pCountry?.country_name || '',
+        bank: deal.bank,
+        amount: deal.amount,
+        currency: p2pCountry?.currency || 'RUB',
+        fake_seller_name: deal.sellerName,
+        status: 'pending_confirm',
+      })
+      .select('id')
+      .single();
+
+    if (error || !newDeal) {
+      Haptic.error();
+      toast.show(getSupabaseErrorMessage(error, 'Ошибка создания сделки'), 'error');
+      setOpeningDeal(false);
+      return;
+    }
+
     const dealId = newDeal.id as string;
     setActiveDealId(dealId);
     setActiveDeal(deal);

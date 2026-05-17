@@ -87,6 +87,15 @@ const FALLBACK_COUNTRIES: CountryBank[] = [
     exchange_rate: 39,
     is_active: true,
   },
+  {
+    id: 5,
+    country_name: 'Беларусь',
+    country_code: 'BY',
+    currency: 'BYN',
+    bank_details: '',
+    exchange_rate: 3.25,
+    is_active: true,
+  },
 ];
 
 function normalizeCountries(data: unknown): CountryBank[] {
