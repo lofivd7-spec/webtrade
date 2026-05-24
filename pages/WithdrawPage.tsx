@@ -249,7 +249,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
       case 'AMOUNT':
         return (
           <div className="space-y-6 pt-6 px-4">
-            <div className="rounded-2xl p-4 bg-card/20 border border-white/5 mb-6">
+            <div className="rounded-xl p-4.5 bg-white/[0.015] border border-white/[0.03] mb-6">
               <label className="text-[10px] text-textSubtle uppercase tracking-widest block mb-2">{t('amount_withdraw')}</label>
               <div className="flex items-center justify-between gap-3">
                 <input
@@ -257,13 +257,13 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
                   inputMode="decimal"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="flex-1 bg-transparent text-2xl font-mono font-bold text-textPrimary outline-none placeholder:text-white/10"
+                  className="flex-1 bg-transparent text-2xl font-mono font-bold text-textPrimary outline-none placeholder:text-white/5"
                   placeholder="0"
                   autoFocus
                 />
                 <span className="text-lg font-mono text-textSubtle">$</span>
               </div>
-              <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/[0.03]">
                 <div className="text-[10px] text-textSubtle">
                   {t('available')}: <span className="text-textPrimary">{formatPrice(balance)} $</span>
                 </div>
@@ -304,7 +304,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
       case 'REQUISITES':
         return (
           <div className="space-y-6 pt-6 px-4">
-            <div className="bg-surface border border-neutral-800 rounded-xl p-4">
+            <div className="bg-white/[0.015] border border-white/[0.03] rounded-xl p-4.5">
               <span className="text-xs text-neutral-500 uppercase">{t('withdraw_amount_label')}</span>
               <div className="text-xl font-mono font-bold text-white">{formattedAmount} {symbol}</div>
               {method === 'CRYPTO' && currentNetwork && (
@@ -315,7 +315,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
               <label className="text-xs text-neutral-500 uppercase font-bold pl-1">
                 {method === 'CRYPTO' ? t('withdraw_address_for_receive') : t('withdraw_requisites_for_receive')}
               </label>
-              <div className="bg-surface border border-neutral-800 rounded-xl px-4 py-3 focus-within:border-neon/50 transition-all">
+              <div className="bg-white/[0.015] border border-white/[0.035] rounded-xl px-4 py-3 focus-within:border-neon/40 transition-all">
                 {method === 'CRYPTO' ? (
                   <input
                     type="text"

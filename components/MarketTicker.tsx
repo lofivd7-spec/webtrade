@@ -33,13 +33,13 @@ const MarketTicker: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full overflow-hidden rounded-lg bg-black/30 border border-white/5 px-3 py-1">
-      <div className="text-[9px] text-neutral-500 uppercase tracking-wider mb-0.5">{t('last_trades')}</div>
+    <div className="w-full overflow-hidden rounded-xl bg-white/[0.02] border border-white/[0.04] px-3 py-1.5">
+      <div className="text-[9px] text-textSubtle uppercase tracking-wider mb-0.5">{t('last_trades')}</div>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5">
         {items.map((item, i) => (
           <span key={`${item.pair}-${start}-${i}`} className="text-[11px] font-mono flex items-center gap-1 leading-tight">
-            <span className="text-white">{item.pair}/{currencyCode}</span>
-            <span className="text-neutral-500">{formatPrice(item.price)} {symbol}</span>
+            <span className="text-textPrimary">{item.pair}/{currencyCode}</span>
+            <span className="text-textMuted">{formatPrice(item.price)} {symbol}</span>
             <span className={item.change >= 0 ? 'text-up' : 'text-down'}>
               {item.change >= 0 ? '+' : ''}
               {item.change.toFixed(2)}%

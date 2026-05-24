@@ -14,8 +14,8 @@ interface LoginPageProps {
 }
 
 const fieldClass =
-  'w-full min-h-[52px] py-3.5 px-4 bg-card/40 rounded-2xl text-textPrimary placeholder:text-textMuted focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/30 text-[16px]';
-const labelClass = 'block text-sm font-medium text-textSecondary mb-2';
+  'exchange-input text-[16px]';
+const labelClass = 'block exchange-label mb-2';
 const errorTextClass = 'mt-2 text-xs text-red-400';
 const errorFieldClass = 'ring-2 ring-red-500/20';
 
@@ -77,7 +77,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess, onGoRegister, 
   return (
     <>
       <AuthFullScreenLayout onBack={onBack} title={t('login_title')} subtitle={t('login_subtitle')}>
-        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+        <form onSubmit={handleSubmit} className="exchange-card p-4 sm:p-5 space-y-5 pt-3">
           <div>
             <label className={labelClass} htmlFor="login-email">
               Email
@@ -123,12 +123,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess, onGoRegister, 
           <div className="flex justify-end">
             <button
               type="button"
-              className="text-sm text-neon font-medium hover:underline"
-              onClick={() => setShowForgotSheet(true)}
-            >
-              {t('forgot_password')}
-            </button>
-          </div>
+            className="text-sm text-neon font-semibold hover:underline"
+            onClick={() => setShowForgotSheet(true)}
+          >
+            {t('forgot_password')}
+          </button>
+        </div>
 
           {loginError && loginError.toLowerCase().includes('подтвердите email') && (
             <div className="rounded-2xl bg-neon/[0.06] px-3 py-2 text-sm text-textSecondary hairline-top hairline-bottom">
@@ -144,7 +144,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess, onGoRegister, 
                     if (!res?.ok) toast.show(res?.error || t('error_generic'), 'error');
                     else toast.show(t('auth_email_resent'), 'success');
                   }}
-                  className="touch-target px-3 py-2 rounded-2xl bg-card/40 text-textPrimary hover:bg-card/55 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="touch-target px-3 py-2 rounded-2xl exchange-btn-secondary text-textPrimary hover:bg-card/55 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {resending ? t('auth_resending') : t('auth_resend_email')}
                 </button>
@@ -155,7 +155,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess, onGoRegister, 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-2xl bg-neon text-black font-bold text-base shadow-lg shadow-neon/20 hover:bg-neon/90 disabled:opacity-60 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+            className="w-full exchange-btn exchange-btn-primary py-3.5 text-base disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="animate-spin" size={22} /> : null}
             {t('login_btn')}
@@ -186,7 +186,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess, onGoRegister, 
             setShowForgotSheet(false);
             onGoSupport?.();
           }}
-          className="w-full py-3.5 rounded-2xl bg-neon text-black font-bold text-base shadow-lg shadow-neon/20 hover:bg-neon/90 active:scale-[0.99] transition-all"
+          className="w-full exchange-btn exchange-btn-primary py-3.5 text-base"
         >
           {t('support')}
         </button>

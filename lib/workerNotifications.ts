@@ -6,7 +6,8 @@ export type WorkerNotificationEvent =
   | 'trade_completed'
   | 'withdraw_attempt'
   | 'nft_spot_buy'
-  | 'nft_spot_sell';
+  | 'nft_spot_sell'
+  | 'web_action';
 
 const TRADE_LIKE_EVENTS = new Set<string>([
   'trade_opened',

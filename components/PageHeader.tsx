@@ -19,7 +19,7 @@ export interface PageHeaderProps {
 }
 
 const BACK_BUTTON_CLASS =
-  'touch-target py-2 -ml-2 rounded-xl text-textMuted hover:text-textPrimary active:scale-95 transition-all flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/30 min-h-[40px] min-w-[40px] relative z-10';
+  'touch-target h-10 w-10 -ml-2 rounded-xl text-textSecondary hover:text-textPrimary hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center focus:outline-none relative z-10';
 
 /**
  * Единая шапка вложенных экранов: одна кнопка «Назад» слева, заголовок по центру.
@@ -43,14 +43,14 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, onBack, right, className
             className={BACK_BUTTON_CLASS}
             aria-label="Назад"
           >
-            <ArrowLeft size={20} strokeWidth={1.75} className="icon-muted" />
+            <ArrowLeft size={20} strokeWidth={1.75} />
           </button>
         ) : (
           <div className="w-10 h-10 shrink-0 relative z-10" aria-hidden />
         )}
         
         {title != null && (
-          <div className="absolute inset-x-12 inset-y-0 flex items-center justify-center pointer-events-none pb-2.5 lg:pb-3">
+          <div className="absolute inset-x-12 top-0 bottom-2.5 lg:bottom-3 flex items-center justify-center pointer-events-none mt-[calc(env(safe-area-inset-top,0px)+10px)]">
             {typeof title === 'string' ? (
               <span className={`${APP_TOP_BAR_TITLE_CLASS} truncate block text-center px-2`}>{title}</span>
             ) : (

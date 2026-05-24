@@ -1,38 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --color-background: #070B12;
-  --color-surface: #0B111C;
-  --color-card: #0E1726;
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-surfaceElevated: #101B2D;
-  --color-subtle: #0E1727;
-  --color-neon: #2A7BFF;
+  --color-background: #06090e;
+  --color-surface: #0a0d14;
+  --color-card: #0e111a;
+  --color-border: rgba(255, 255, 255, 0.04);
+  --color-surfaceElevated: #111522;
+  --color-subtle: #090c12;
+  --color-neon: #1b8eff;
   --color-accent: #2A7BFF;
-  --color-accentMuted: rgba(42, 123, 255, 0.14);
-  --color-up: #10b981;
-  --color-down: #f87171;
-  --color-ink: #F2F4F7;
-  --color-textPrimary: #ECEEF1;
-  --color-textSecondary: #A8B3C0;
-  --color-textMuted: #9BA5B5;
-  --color-textSubtle: #6E7A8C;
-  --color-textCaption: #9AA5B5;
-  --color-hairline: rgba(255, 255, 255, 0.04);
-  --color-hairlineStrong: rgba(255, 255, 255, 0.06);
-  --color-divider: rgba(255, 255, 255, 0.06);
-  --color-icon: rgba(236, 238, 241, 0.85);
-  --color-icon-muted: rgba(155, 165, 181, 0.85);
-  --color-icon-subtle: rgba(110, 122, 140, 0.9);
-  --font-family-sans: 'Inter', system-ui, sans-serif;
-  --font-family-mono: 'Roboto Mono', monospace;
-  --radius-card: 12px;
+  --color-accentMuted: rgba(42, 123, 255, 0.06);
+  --color-up: #22c59e;
+  --color-down: #ff5b68;
+  --color-ink: #f2f7ff;
+  --color-textPrimary: #f0f5fc;
+  --color-textSecondary: #90a2b8;
+  --color-textMuted: #6b7c96;
+  --color-textSubtle: #52637a;
+  --color-textCaption: #788ba3;
+  --color-hairline: rgba(255, 255, 255, 0.02);
+  --color-hairlineStrong: rgba(255, 255, 255, 0.05);
+  --color-divider: rgba(255, 255, 255, 0.035);
+  --color-icon: rgba(234, 244, 255, 0.95);
+  --color-icon-muted: rgba(144, 162, 184, 0.9);
+  --color-icon-subtle: rgba(107, 124, 150, 0.9);
+  --font-family-sans: "Manrope", "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-family-mono: "JetBrains Mono", "SF Mono", "Menlo", monospace;
+  --radius-card: 14px;
   --radius-modal: 16px;
-  --radius-strict: 4px;
-  --shadow-glass: 0 0 0 1px rgba(255, 255, 255, 0.08);
-  --shadow-elevation-1: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-elevation-2: 0 4px 12px rgba(0,0,0,0.35);
-  --shadow-elevation-3: 0 8px 24px rgba(0,0,0,0.4);
+  --radius-strict: 8px;
+  --shadow-glass: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-elevation-1: 0 4px 20px rgba(0, 0, 0, 0.2);
+  --shadow-elevation-2: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-elevation-3: 0 16px 48px rgba(0, 0, 0, 0.4);
 }
 
 :root {
@@ -43,6 +44,8 @@
   --color-flash-up: rgba(16, 185, 129, 0.35);
   --color-flash-down: rgba(248, 113, 113, 0.35);
   --border-subtle: 1px solid rgba(255, 255, 255, 0.05);
+  --space-unit: 8px;
+  --surface-gradient: linear-gradient(170deg, rgba(28, 71, 122, 0.24) 0%, rgba(14, 29, 48, 0.8) 55%, rgba(8, 16, 29, 0.96) 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -63,9 +66,9 @@ html {
 }
 body {
   height: 100%;
-  background-color: #070B12;
-  color: #ECEEF1;
-  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #06090e;
+  color: #f0f5fc;
+  font-family: "Manrope", "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.45;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -300,9 +303,10 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
 }
 
 .nav-icon-pill {
-  background: color-mix(in oklab, var(--color-accentMuted) 85%, transparent);
-  border: 1px solid color-mix(in oklab, var(--color-accent) 20%, rgba(255,255,255,0.05));
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  background: rgba(27, 142, 255, 0.08);
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 12px;
 }
 
 .nav-dot {
@@ -313,40 +317,35 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-accent) 18%, transparent);
 }
 
-/* ==========================================
-   MEXC Premium UI Components
-   ========================================== */
-
-/* Cards */
+/* =========================================/* Cards */
 .panel {
-  background: color-mix(in oklab, var(--color-card) 82%, transparent);
-  border-radius: 16px;
+  background: var(--color-card);
+  border-radius: 12px;
 }
 
 .panel-muted {
-  background: color-mix(in oklab, var(--color-card) 68%, transparent);
-  border-radius: 16px;
+  background: var(--color-surface);
+  border-radius: 12px;
 }
 
 /* MEXC-style card with subtle border */
 .mexc-card {
   background: var(--color-card);
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 12px;
 }
 
 /* MEXC input field */
 .mexc-input {
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
   color: var(--color-textPrimary);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 .mexc-input:focus-within {
-  border-color: rgba(42, 123, 255, 0.45);
-  background: rgba(42, 123, 255, 0.05);
+  border-color: rgba(42, 123, 255, 0.35);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 /* MEXC standard buttons */
@@ -354,72 +353,38 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
 }
 .mexc-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 .mexc-btn-primary {
   background: var(--color-neon);
   color: #000;
-  box-shadow: 0 4px 16px rgba(42, 123, 255, 0.25);
 }
 .mexc-btn-primary:hover {
-  background: color-mix(in oklab, var(--color-neon) 90%, white);
-  box-shadow: 0 6px 20px rgba(42, 123, 255, 0.35);
-}
-
-/* MEXC badge / pill */
-.mexc-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-/* MEXC glow button effect */
-.mexc-glow {
-  box-shadow: 0 0 16px rgba(42, 123, 255, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-.mexc-glow:hover {
-  box-shadow: 0 0 24px rgba(42, 123, 255, 0.35), 0 4px 16px rgba(0, 0, 0, 0.5);
-}
-
-/* Row list items */
-.list-row {
-  background: transparent;
-  border-radius: 0;
-}
-.list-row + .list-row {
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-}
-.list-row:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in oklab, var(--color-neon) 92%, white);
 }
 
 /* Segmented control */
 .segmented {
   display: inline-flex;
   gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 0.2rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
 }
 .segmented button {
-  border-radius: 999px;
+  border-radius: 6px;
 }
 
 /* P2P Status Banner */
 .p2p-banner {
-  background: linear-gradient(135deg, rgba(42, 123, 255, 0.12) 0%, rgba(42, 123, 255, 0.06) 100%);
-  border: 1px solid rgba(42, 123, 255, 0.2);
-  backdrop-filter: blur(8px);
+  background: rgba(42, 123, 255, 0.03);
+  border: 1px solid rgba(42, 123, 255, 0.08);
 }
 
 /* User info chip */
@@ -429,8 +394,8 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
   gap: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 11px;
   font-weight: 500;
   color: var(--color-textSecondary);
@@ -438,4 +403,120 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ==========================================
+   Exchange Design System (MEXC-like)
+   ========================================== */
+
+.exchange-card {
+  background: var(--color-card);
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 14px;
+}
+
+.exchange-panel {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.exchange-label {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-textMuted);
+  font-weight: 600;
+}
+
+.exchange-input {
+  min-height: 44px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.015);
+  color: var(--color-textPrimary);
+  padding: 0 12px;
+  transition:
+    border-color 150ms ease-in-out,
+    box-shadow 150ms ease-in-out,
+    background-color 150ms ease-in-out;
+}
+
+.exchange-input::placeholder {
+  color: var(--color-textMuted);
+}
+
+.exchange-input:focus-visible {
+  outline: none;
+  border-color: rgba(42, 123, 255, 0.4);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.exchange-btn {
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition:
+    transform 150ms ease-in-out,
+    box-shadow 150ms ease-in-out,
+    background-color 150ms ease-in-out,
+    border-color 150ms ease-in-out;
+}
+
+.exchange-btn:active {
+  transform: scale(0.98);
+}
+
+.exchange-btn-primary {
+  background: var(--color-neon);
+  color: #000;
+}
+
+.exchange-btn-secondary {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-textPrimary);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ==========================================
+   Premium Project-Wide Style Overrides
+   ========================================== */
+
+/* Remove harsh gray borders project-wide */
+.border-neutral-800, .border-neutral-700, .border-neutral-900, .border-neutral-600 {
+  border-color: rgba(255, 255, 255, 0.035) !important;
+}
+
+/* Ensure dashed borders keep their style */
+.border-dashed {
+  border-style: dashed !important;
+}
+
+/* Professional Matte Input & Dropdown Styling */
+input[type="text"], input[type="number"], input[type="password"], input[type="email"], input[type="numeric"], select, textarea {
+  border-radius: 10px !important;
+  background-color: rgba(255, 255, 255, 0.015) !important;
+  border: 1px solid rgba(255, 255, 255, 0.045) !important;
+  color: var(--color-textPrimary) !important;
+  transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="numeric"]:focus, select:focus, textarea:focus {
+  border-color: rgba(27, 142, 255, 0.45) !important;
+  background-color: rgba(255, 255, 255, 0.025) !important;
+  box-shadow: 0 0 0 3px rgba(27, 142, 255, 0.08) !important;
+  outline: none !important;
+}
+
+/* Clean, modern back buttons */
+button[aria-label="Назад"], button[aria-label="Back"] {
+  color: var(--color-textSecondary) !important;
+  transition: all 0.15s ease-in-out;
+}
+button[aria-label="Назад"]:hover, button[aria-label="Back"]:hover {
+  color: var(--color-textPrimary) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
 }

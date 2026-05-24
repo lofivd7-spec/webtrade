@@ -116,7 +116,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const formatPrice = useCallback(
     (priceRub: number, options?: { fractionDigits?: number }): string => {
       const value = convertFromRub(priceRub);
-      const fractionDigits = options?.fractionDigits ?? (value < 1 ? 6 : value < 100 ? 2 : 0);
+      const fractionDigits = options?.fractionDigits ?? (value === 0 ? 2 : value < 1 ? 6 : value < 100 ? 2 : 0);
       return new Intl.NumberFormat('ru-RU', {
         style: 'decimal',
         minimumFractionDigits: fractionDigits,

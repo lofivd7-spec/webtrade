@@ -18,8 +18,8 @@ interface RegisterPageProps {
 }
 
 const fieldClass =
-  'w-full min-h-[52px] py-3.5 px-4 bg-card border border-border/90 rounded-xl text-textPrimary placeholder:text-textMuted focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/30 focus-visible:border-neon/40 text-[16px]';
-const labelClass = 'block text-sm font-medium text-textSecondary mb-2';
+  'exchange-input text-[16px]';
+const labelClass = 'block exchange-label mb-2';
 const errorTextClass = 'mt-2 text-xs text-red-400';
 const errorFieldClass = 'border-red-500/60 focus-visible:ring-red-500/20 focus-visible:border-red-500/60';
 
@@ -136,7 +136,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
     <>
       <AuthFullScreenLayout onBack={onBack} title={t('auth_register_title')} subtitle={t('auth_register_subtitle')}>
         {step === 'form' ? (
-          <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          <form onSubmit={handleSubmit} className="exchange-card p-4 sm:p-5 space-y-5 pt-3">
           <div>
             <label className={labelClass} htmlFor="reg-email">
               Email
@@ -253,7 +253,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
           <button
             type="submit"
             disabled={loading || rateLimitCooldown > 0}
-            className="w-full py-4 rounded-2xl bg-neon text-black font-bold text-base shadow-lg shadow-neon/20 hover:bg-neon/90 disabled:opacity-60 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+            className="w-full exchange-btn exchange-btn-primary py-3.5 text-base disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="animate-spin" size={22} /> : null}
             {rateLimitCooldown > 0 ? t('auth_wait_seconds', { s: rateLimitCooldown }) : t('create_account')}
@@ -268,7 +268,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
           </form>
         ) : (
           <div className="space-y-4 pt-2">
-            <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="exchange-card p-4">
               <h2 className="text-lg font-bold text-textPrimary">{t('auth_confirm_email_title')}</h2>
               <p className="text-sm text-textSecondary mt-2 leading-relaxed">
                 Мы отправили письмо на <span className="font-mono text-white">{email.trim().toLowerCase()}</span>.
@@ -296,7 +296,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
                     setLoading(false);
                   }
                 }}
-                className="w-full py-4 rounded-2xl bg-neon text-black font-bold text-base shadow-lg shadow-neon/20 hover:bg-neon/90 disabled:opacity-60 active:scale-[0.99] transition-all"
+                className="w-full exchange-btn exchange-btn-primary py-3.5 text-base disabled:opacity-60"
               >
                 {t('auth_confirmed_email')}
               </button>
@@ -311,7 +311,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
                   if (!res.ok) toast.show(res.error || t('error_generic'), 'error');
                   else toast.show(t('auth_email_resent'), 'success');
                 }}
-                className="w-full py-3 rounded-2xl border border-border bg-card text-textPrimary font-semibold active:scale-[0.99] transition-all hover:bg-surface"
+                className="w-full py-3 rounded-2xl exchange-btn-secondary text-textPrimary font-semibold active:scale-[0.99] transition-all hover:bg-surface"
               >
                 {resending ? t('auth_resending') : t('auth_resend_email')}
               </button>
@@ -339,7 +339,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
                 href={'https://mail.google.com/'}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3 rounded-2xl bg-neon text-black font-bold text-base shadow-lg shadow-neon/20 hover:bg-neon/90 active:scale-[0.99] transition-all text-center"
+                className="w-full exchange-btn exchange-btn-primary py-3 text-base text-center"
               >
                 {t('auth_open_gmail')}
               </a>
@@ -349,7 +349,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
                   setShowConfirmModal(false);
                   toast.show('После подтверждения вы войдёте автоматически. Если нет — нажмите «Я подтвердил email».', 'success');
                 }}
-                className="w-full py-3 rounded-2xl border border-border bg-card text-textPrimary font-semibold active:scale-[0.99] transition-all hover:bg-surface"
+                className="w-full py-3 rounded-2xl exchange-btn-secondary text-textPrimary font-semibold active:scale-[0.99] transition-all hover:bg-surface"
               >
                 Я подтвержу сейчас
               </button>

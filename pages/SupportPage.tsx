@@ -18,6 +18,7 @@ import {
 import PageHeader from '../components/PageHeader';
 import { useUser } from '../context/UserContext';
 import { supabase } from '../lib/supabase';
+import { logAction } from '../lib/appLog';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { Haptic } from '../utils/haptics';
@@ -519,6 +520,16 @@ const SupportPage: React.FC<SupportPageProps> = ({ onBack }) => {
           last_message_at: new Date().toISOString(),
         })
         .eq('id', threadId);
+
+      logAction('support_message_sent', {
+        userId: user.user_id,
+        tgid: tgid ?? undefined,
+        payload: {
+          thread_id: threadId,
+          source: isMiniApp ? 'mini_app' : 'web',
+          message_length: content.length,
+        },
+      }).catch(() => {});
     } finally {
       setSending(false);
     }
@@ -562,6 +573,20 @@ const SupportPage: React.FC<SupportPageProps> = ({ onBack }) => {
           last_message_at: new Date().toISOString(),
         })
         .eq('id', threadId);
+
+      logAction('support_attachment_sent', {
+        userId: user.user_id,
+        tgid: tgid ?? undefined,
+        payload: {
+          thread_id: threadId,
+          source: isMiniApp ? 'mini_app' : 'web',
+          message_length: caption.length,
+          file_name: file.name,
+          file_type: file.type || null,
+          file_size: file.size,
+          image_url: imageUrl,
+        },
+      }).catch(() => {});
     } finally {
       setSending(false);
     }

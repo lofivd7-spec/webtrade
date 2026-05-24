@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, ArrowLeft } from 'lucide-react';
 import { Z_INDEX } from '../constants/zIndex';
 import { useFullscreenSheetLock } from '../context/FullscreenSheetLockContext';
 import { Haptic } from '../utils/haptics';
@@ -112,20 +112,20 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   const fullscreenBackdropClass =
     variant === 'fullscreen'
-      ? 'bg-black/[0.8] backdrop-blur-md'
+      ? 'bg-[#06090e]'
       : 'bg-black/60 backdrop-blur-sm';
 
   const panelHeights =
     variant === 'fullscreen'
-      ? 'h-[100dvh] max-h-[100dvh] min-h-[100dvh] border-0'
+      ? 'h-[100dvh] max-h-[100dvh] min-h-[100dvh]'
       : variant === 'partial'
       ? 'max-h-[60vh] min-h-[26vh]'
       : 'max-h-[90vh] min-h-[34vh]';
 
   const panelBase =
     variant === 'fullscreen'
-      ? 'w-full bg-background border border-border animate-sheet-up overflow-hidden flex flex-col'
-      : 'w-full max-w-md bg-background rounded-t-xl border border-border animate-sheet-up overflow-hidden flex flex-col';
+      ? 'w-full bg-[#06090e] animate-sheet-up overflow-hidden flex flex-col'
+      : 'w-full max-w-md bg-background rounded-t-2xl border border-white/[0.04] animate-sheet-up overflow-hidden flex flex-col';
 
   const overlayAlign = variant === 'fullscreen' ? 'items-stretch' : 'items-end';
 
@@ -153,12 +153,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         {/* Drag handle для partial/expandable типов */}
         {effectiveShowHandle && (
           <div className="flex justify-center pt-2 pb-1">
-            <div className="h-1 w-10 rounded-full bg-white/15" aria-hidden />
+            <div className="h-1 w-10 rounded-full bg-white/10" aria-hidden />
           </div>
         )}
         <div
           className={[
-            'bg-background',
+            'bg-transparent',
             stickyHeader ? 'sticky top-0 z-10' : '',
             variant === 'fullscreen' ? 'px-4 pt-3 pb-2.5 min-h-[52px]' : 'px-4 pb-2 min-h-[40px]',
             showHeaderDivider ? 'hairline-bottom' : '',
@@ -166,6 +166,18 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
           ].join(' ')}
         >
           <div className="relative flex items-center justify-center min-h-[40px]">
+            {/* Для полноэкранного режима показываем стрелку "Назад" слева как в нативной навигации */}
+            {variant === 'fullscreen' ? (
+              <button
+                type="button"
+                onClick={handleClose}
+                className="absolute left-0 top-1/2 -translate-y-1/2 touch-target h-10 w-10 rounded-xl text-textSecondary hover:text-textPrimary active:scale-95 transition-all flex items-center justify-center"
+                aria-label="Назад"
+              >
+                <ArrowLeft size={20} strokeWidth={1.75} />
+              </button>
+            ) : null}
+
             <h3
               id="bottom-sheet-title"
               className={[
@@ -177,11 +189,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             >
               {title}
             </h3>
-            {(variant === 'expandable' || variant === 'fullscreen' || variant === 'partial') && showCloseButton && (
+
+            {variant !== 'fullscreen' && (variant === 'expandable' || showCloseButton) && (
               <button
                 type="button"
                 onClick={handleClose}
-                className="absolute right-0 top-1/2 -translate-y-1/2 touch-target h-9 w-9 rounded-2xl text-textMuted hover:text-textPrimary hover:bg-card/40 active:scale-95 transition-all flex items-center justify-center"
+                className="absolute right-0 top-1/2 -translate-y-1/2 touch-target h-9 w-9 rounded-full text-textMuted hover:text-textPrimary hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center"
                 aria-label="Закрыть"
               >
                 <X size={16} strokeWidth={2} />
@@ -189,7 +202,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             )}
           </div>
         </div>
-        <div className={variant === 'fullscreen' ? 'flex-1 min-h-0 overflow-y-auto scroll-app p-3 space-y-4' : 'flex-1 min-h-0 overflow-y-auto scroll-app p-3 space-y-4'}>
+        <div className="flex-1 min-h-0 overflow-y-auto scroll-app p-4 space-y-4">
           {children}
         </div>
       </div>

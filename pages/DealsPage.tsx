@@ -269,15 +269,17 @@ const DealsPage: React.FC<DealsPageProps> = ({
               <span className="text-xs text-white/70 font-medium leading-none">{currencyCode}</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span
-                className={`text-[11px] font-mono px-2 py-1 rounded-full ${
-                  dayChangeRub >= 0 ? 'text-up bg-emerald-500/10' : 'text-down bg-red-500/10'
-                }`}
-              >
-                {dayChangeRub >= 0 ? '+' : ''}
-                {formatPrice(dayChangeRub)} {symbol} ({dayChangePct >= 0 ? '+' : ''}
-                {dayChangePct.toFixed(2)}%)
-              </span>
+              {dayChangeRub !== 0 && (
+                <span
+                  className={`text-[11px] font-mono px-2 py-1 rounded-full ${
+                    dayChangeRub > 0 ? 'text-up bg-emerald-500/10' : 'text-down bg-red-500/10'
+                  }`}
+                >
+                  {dayChangeRub > 0 ? '+' : ''}
+                  {formatPrice(dayChangeRub)} {symbol} ({dayChangePct > 0 ? '+' : ''}
+                  {dayChangePct.toFixed(2)}%)
+                </span>
+              )}
               {activeDeals.length > 0 ? (
                 <span className="text-[11px] text-textMuted">
                   {activeDeals.length} {t('active_tab').toLowerCase()} · {formatPrice(totalActiveExposure)} {symbol}
@@ -286,13 +288,15 @@ const DealsPage: React.FC<DealsPageProps> = ({
             </div>
           </div>
 
-          <div className="text-right shrink-0">
-            <p className="text-[10px] uppercase tracking-wider text-textMuted">P&L</p>
-            <p className={`text-sm font-mono font-bold ${totalPnlActive >= 0 ? 'text-up' : 'text-down'}`}>
-              {totalPnlActive >= 0 ? '+' : ''}
-              {formatPrice(totalPnlActive)} {symbol}
-            </p>
-          </div>
+          {activeDeals.length > 0 && (
+            <div className="text-right shrink-0">
+              <p className="text-[10px] uppercase tracking-wider text-textMuted">P&L</p>
+              <p className={`text-sm font-mono font-bold ${totalPnlActive >= 0 ? 'text-up' : 'text-down'}`}>
+                {totalPnlActive >= 0 ? '+' : ''}
+                {formatPrice(totalPnlActive)} {symbol}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Actions row */}

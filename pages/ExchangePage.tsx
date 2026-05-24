@@ -224,8 +224,8 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
             {t('exchange_mode_futures')}
           </button>
           <div className="flex-1" />
-          <div className="h-9 w-9 rounded-2xl bg-black/30 border border-white/5 flex items-center justify-center text-textSecondary">
-            <ConvertIcon size={18} />
+          <div className="h-9 w-9 rounded-xl bg-white/[0.03] flex items-center justify-center text-textSecondary">
+            <ConvertIcon size={18} strokeWidth={1.75} />
           </div>
         </div>
 
@@ -241,11 +241,11 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
             <button
               type="button"
               onClick={() => { Haptic.tap(); onGoTrading?.('spot'); onBack(); }}
-              className="h-9 w-9 rounded-2xl flex items-center justify-center active:scale-[0.98] transition-transform bg-black/30 text-textSecondary border border-white/5"
+              className="touch-target h-9 w-9 rounded-xl flex items-center justify-center text-textSecondary hover:text-textPrimary hover:bg-white/5 active:scale-95 transition-all focus:outline-none"
               aria-label={t('chart_title')}
               title={t('chart_title')}
             >
-              <BarChart3 size={18} />
+              <BarChart3 size={18} strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -265,7 +265,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
                   Haptic.tap();
                   openPicker('from');
                 }}
-                className="touch-target w-full flex items-center justify-between gap-2 py-2.5 px-3 rounded-2xl bg-black/30 border border-white/5 transition-colors text-left"
+                className="touch-target w-full flex items-center justify-between gap-2 py-2.5 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-all text-left"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-mono font-semibold text-sm text-textPrimary truncate">{fromLabel}</p>
@@ -281,7 +281,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
                 placeholder={isFromCurrency ? `0 ${symbol}` : '0'}
                 value={amount}
                 onChange={(e) => setAmount(sanitizeDecimalInput(e.target.value))}
-                className="w-full bg-black/30 border border-white/5 rounded-2xl px-3 py-2.5 text-textPrimary font-mono text-sm placeholder:text-textMuted focus:outline-none focus:border-white/10 transition-colors"
+                className="w-full bg-white/[0.02] hover:bg-white/[0.03] focus:bg-white/[0.04] rounded-xl px-3 py-2.5 text-textPrimary font-mono text-sm placeholder:text-textMuted focus:outline-none transition-all"
               />
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[10px] font-mono text-textMuted">
@@ -335,7 +335,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
                   Haptic.tap();
                   openPicker('to');
                 }}
-                className="touch-target w-full flex items-center justify-between gap-2 py-2.5 px-3 rounded-2xl bg-black/30 border border-white/5 transition-colors text-left"
+                className="touch-target w-full flex items-center justify-between gap-2 py-2.5 px-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-all text-left"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-mono font-semibold text-sm text-textPrimary truncate">{toLabel}</p>

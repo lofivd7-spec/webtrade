@@ -31,18 +31,18 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0d1117] via-background to-background pointer-events-none" />
-      <div className="absolute top-0 right-0 w-[min(100%,520px)] h-72 bg-neon/[0.07] blur-[120px] rounded-full translate-x-1/3 -translate-y-1/2 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(900px_440px_at_7%_-15%,rgba(32,120,225,0.22),transparent_62%),radial-gradient(760px_360px_at_96%_-10%,rgba(18,168,255,0.16),transparent_65%)] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[min(100%,560px)] h-72 bg-neon/[0.09] blur-[130px] rounded-full translate-x-1/3 -translate-y-1/2 pointer-events-none" />
 
       <div className={`h-full w-full ${split ? 'lg:grid lg:grid-cols-2' : 'flex flex-col'}`}>
         {/* LEFT: Hero (desktop only) */}
         {split && (
-          <aside className="hidden lg:flex relative overflow-hidden border-r border-border/60 bg-surface">
+          <aside className="hidden lg:flex relative overflow-hidden border-r border-border/60 bg-surface/90 backdrop-blur-xl">
             {/* геометрический паттерн (очень низкая прозрачность) */}
             <div className="absolute inset-0 pointer-events-none" aria-hidden>
-              <div className="absolute -top-24 -left-24 h-[420px] w-[420px] rounded-full bg-white/[0.03]" />
+              <div className="absolute -top-24 -left-24 h-[420px] w-[420px] rounded-full bg-white/[0.025]" />
               <div className="absolute top-[18%] right-[-120px] h-[340px] w-[340px] rotate-12 bg-white/[0.02] rounded-[48px]" />
-              <div className="absolute bottom-[-120px] left-[20%] h-[380px] w-[380px] rotate-[-8deg] bg-neon/[0.04] rounded-full blur-[2px]" />
+              <div className="absolute bottom-[-120px] left-[20%] h-[380px] w-[380px] rotate-[-8deg] bg-neon/[0.06] rounded-full blur-[2px]" />
             </div>
 
             <div className="relative flex-1 flex flex-col p-10">
@@ -63,41 +63,41 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
 
               <div className="mt-12">
                 <h1 className="text-4xl font-bold tracking-tight text-ink leading-[1.05]">
-                  Премиальный{' '}
+                  Профессиональный{' '}
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-neon via-neon/80 to-up">
-                    инструмент для трейдинга
+                    терминал криптобиржи
                   </span>
                 </h1>
                 <p className="mt-4 text-sm text-textSecondary leading-relaxed max-w-md">
-                  Терминальный интерфейс в стиле финтех‑платформ: быстро, строго, без визуального шума.
+                  Строгий продуктовый интерфейс: высокая читаемость, стабильная иерархия данных и понятные сценарии для реальной торговли.
                 </p>
               </div>
 
               <div className="mt-10 grid gap-4 max-w-md">
-                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.06] px-4 py-3">
+                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.08] px-4 py-3">
                   <TrendingUp size={18} className="text-neon shrink-0 mt-0.5" strokeWidth={2} />
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-textPrimary">Рыночные данные</div>
                     <div className="text-[12px] text-textSecondary leading-snug">
-                      Котировки и динамика без лишних экранов.
+                      Лента рынков, стакан, спот и фьючерсы в едином паттерне.
                     </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.06] px-4 py-3">
+                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.08] px-4 py-3">
                   <BarChart2 size={18} className="text-neon shrink-0 mt-0.5" strokeWidth={2} />
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-textPrimary">Аналитика</div>
                     <div className="text-[12px] text-textSecondary leading-snug">
-                      Графики TradingView и терминальный UX.
+                      Скоростной chart-flow и точная работа с позициями.
                     </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.06] px-4 py-3">
+                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.08] px-4 py-3">
                   <Shield size={18} className="text-neon shrink-0 mt-0.5" strokeWidth={2} />
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-textPrimary">Надёжность</div>
                     <div className="text-[12px] text-textSecondary leading-snug">
-                      Защита данных и подтверждения действий.
+                      Подтверждения операций, логирование и контроль безопасности.
                     </div>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
           <div className="absolute bottom-[-60px] left-[-60px] h-52 w-52 -rotate-6 bg-white/[0.03] blur-[1px] clip-triangle pointer-events-none" />
 
           {/* Header (mobile + desktop) */}
-          <header className="relative shrink-0 flex items-center gap-3 px-4 py-3 hairline-bottom bg-background/80 backdrop-blur-md">
+          <header className="relative shrink-0 flex items-center gap-3 px-4 py-3 hairline-bottom bg-background/72 backdrop-blur-xl">
             <button
               type="button"
               onClick={() => {

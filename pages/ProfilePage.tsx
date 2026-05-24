@@ -82,10 +82,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           <button
             type="button"
             onClick={() => { Haptic.tap(); onBack(); }}
-            className="touch-target h-10 w-10 rounded-2xl bg-black/30 border border-white/5 flex items-center justify-center text-textSecondary active:scale-[0.98] transition-transform"
+            className="touch-target h-10 w-10 rounded-xl flex items-center justify-center text-textSecondary hover:text-textPrimary hover:bg-white/5 active:scale-95 transition-all focus:outline-none"
             aria-label={t('close_aria')}
           >
-            <X size={18} />
+            <X size={20} strokeWidth={1.75} />
           </button>
           <div className="flex-1" />
         </div>

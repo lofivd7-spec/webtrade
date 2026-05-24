@@ -160,13 +160,13 @@ export default function CryptoBannerWidget() {
   }, [ids]);
 
   return (
-    <div className="mt-3 rounded-2xl bg-[#050608]/95 border border-white/[0.06] overflow-hidden shadow-inner shadow-black/40">
-      <div className="px-3 pt-2.5 pb-1.5 flex items-center justify-between border-b border-white/[0.04]">
+    <div className="mt-3 rounded-xl bg-[#0e111a] border border-white/[0.04] overflow-hidden">
+      <div className="px-3 pt-2.5 pb-1.5 flex items-center justify-between border-b border-white/[0.03]">
         <div className="text-[10px] font-semibold text-textMuted uppercase tracking-wider">Market</div>
         <div className="text-[9px] text-textMuted/80 font-mono">{loading ? '…' : 'Live'}</div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-black/70">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/[0.03]">
         {COINS.map((coin) => {
           const row = data?.[coin.id];
           const price = row?.current_price;
@@ -191,14 +191,8 @@ export default function CryptoBannerWidget() {
           return (
             <div
               key={coin.id}
-              className="bg-[#07090e] px-2.5 py-2.5 relative overflow-hidden hover:bg-[#0a0d14] transition-colors"
+              className="bg-[#0e111a] px-2.5 py-2.5 relative overflow-hidden hover:bg-[#121622] transition-colors"
             >
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `radial-gradient(100px 48px at 8% 0%, ${accent.glow} 0%, rgba(0,0,0,0) 70%)`,
-                }}
-              />
 
               <div className="flex items-center justify-between gap-1.5">
                 <div className="flex items-center gap-1.5 min-w-0">

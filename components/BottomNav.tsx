@@ -36,7 +36,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, onNavigate, embedded
   const activeNav = pageToNav[currentPage] ?? currentPage;
 
   const navBody = (
-    <div className="flex justify-around items-stretch min-h-[50px] px-2 pt-1 pb-0">
+    <div className="flex justify-around items-stretch min-h-[56px] px-2 pt-1 pb-1">
       {navItems.map((item) => {
         const isActive = activeNav === item.id;
         const Icon = item.icon;
@@ -47,8 +47,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, onNavigate, embedded
             className="touch-target nav-item flex flex-col items-center justify-center flex-1 min-w-0 gap-1 py-1.5"
             aria-current={isActive ? 'page' : undefined}
           >
-            <div className="flex items-center justify-center rounded-2xl">
-              <div className="h-7 w-10 flex items-center justify-center">
+            <div className={`flex items-center justify-center rounded-2xl ${isActive ? 'nav-icon-pill' : ''}`}>
+              <div className="h-8 w-10 flex items-center justify-center">
                 <Icon active={isActive} className={isActive ? 'text-textPrimary' : 'text-textSubtle'} size={19} />
               </div>
             </div>
@@ -71,7 +71,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, onNavigate, embedded
 
   return (
     <nav
-      className="fixed left-0 right-0 bottom-0 z-50 nav-glass border-t border-white/[0.06]"
+      className="fixed left-0 right-0 bottom-0 z-50 nav-glass border-t border-white/[0.025]"
       style={{
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}

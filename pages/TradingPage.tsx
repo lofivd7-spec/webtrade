@@ -210,7 +210,7 @@ function ChartToolbar(props: {
 
   return (
     <div
-      className={`bg-background/80 backdrop-blur-sm border-b border-border/40 px-4 py-2 flex items-center gap-2 transition-all duration-300 ${
+      className={`bg-background/72 backdrop-blur-xl border-b border-border/60 px-4 py-2 flex items-center gap-2 transition-all duration-300 ${
         isFullscreen ? 'fixed top-0 left-0 right-0' : 'relative z-20'
       }`}
       style={isFullscreen ? { zIndex: Z_INDEX.fullscreen + 1 } : undefined}
@@ -296,7 +296,19 @@ function ChartToolbar(props: {
       </div>
 
       {/* h) fullscreen button */}
-      {/* Fullscreen button отключён по запросу */}
+      <button
+        type="button"
+        onClick={() => (isFullscreen ? onCloseFullscreen() : onFullscreenToggle())}
+        className={`ml-1 p-1.5 rounded border transition-colors ${
+          isFullscreen
+            ? 'bg-card text-neon border-neon/30'
+            : 'text-textMuted border-transparent hover:text-white'
+        }`}
+        aria-label={isFullscreen ? t('close') : t('chart_toggle_aria')}
+        title={isFullscreen ? t('close') : t('chart_toggle_aria')}
+      >
+        {isFullscreen ? <CloseXIcon /> : <ExpandIcon />}
+      </button>
     </div>
   );
 }

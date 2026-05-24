@@ -92,13 +92,13 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
   }, [user?.user_id, user?.referrer_id, promoTick]);
 
   return (
-    <div className="flex flex-col min-h-full animate-fade-in px-4 lg:px-6 lg:max-w-4xl mx-auto pb-28 lg:pb-12">
+    <div className="flex flex-col min-h-full animate-fade-in px-4 lg:px-6 lg:max-w-5xl mx-auto pb-28 lg:pb-12">
       {/* Top bar (как у MEXC) */}
       <header
         className={[
           'sticky top-0 z-40 -mx-4 lg:-mx-6 px-4 lg:px-6',
           'pt-3 pb-2',
-          'bg-background',
+          'bg-background/85 backdrop-blur-xl',
           'hairline-bottom',
           'transition-transform duration-200',
           topBarHidden ? '-translate-y-full' : 'translate-y-0',
@@ -108,13 +108,13 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
           <button
             type="button"
             onClick={() => { Haptic.tap(); onNavigate('PROFILE'); }}
-            className="touch-target h-8 w-8 rounded-full bg-card/45 flex items-center justify-center active:scale-[0.98] transition-transform shrink-0"
+            className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
             aria-label={t('profile')}
           >
             {user?.photo_url ? (
-              <img src={user.photo_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+              <img src={user.photo_url} alt="" className="h-7 w-7 rounded-full object-cover" />
             ) : (
-              <User size={18} className="text-textSecondary" />
+              <User size={20} className="text-textSecondary" />
             )}
           </button>
 
@@ -122,7 +122,7 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             <button
               type="button"
               onClick={() => { Haptic.tap(); onSearch(); }}
-              className="w-full h-8 rounded-2xl bg-surface/60 flex items-center gap-2 px-3 text-left active:scale-[0.99] transition-transform"
+              className="w-full h-10 rounded-xl bg-white/5 flex items-center gap-2 px-3 text-left active:scale-[0.99] transition-transform"
             >
               <Search size={16} className="text-textSubtle shrink-0" />
               <input
@@ -138,10 +138,10 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             <button
               type="button"
               onClick={() => { Haptic.tap(); onNavigate('SUPPORT'); }}
-              className="touch-target h-8 w-8 rounded-full bg-card/45 flex items-center justify-center active:scale-[0.98] transition-transform"
+              className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all text-textSecondary hover:text-textPrimary"
               aria-label={t('support')}
             >
-              <Headphones size={17} className="text-textSecondary" />
+              <Headphones size={20} />
             </button>
           </div>
         </div>
@@ -175,7 +175,7 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
           <button
             type="button"
             onClick={() => { Haptic.tap(); onNavigate('DEPOSIT'); }}
-            className="touch-target px-4 h-9 rounded-full bg-neon text-black text-sm font-semibold shadow-sm shadow-neon/15 active:scale-[0.98] transition-transform flex items-center justify-center"
+            className="touch-target exchange-btn exchange-btn-primary px-4 h-10 rounded-full text-sm active:scale-[0.98] flex items-center justify-center animate-none"
           >
             {t('deposit')}
           </button>
@@ -185,7 +185,7 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
       {/* “Complete Your Futures Trade” style banner */}
       <section className="pb-4">
         <div
-          className="rounded-2xl bg-card/45 px-3 py-2.5 flex items-center justify-between gap-3"
+          className="bg-white/5 rounded-xl px-3.5 py-3 flex items-center justify-between gap-3"
         >
           <div className="min-w-0">
             <div className="text-xs text-textPrimary truncate">
@@ -196,7 +196,7 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
           <button
             type="button"
             onClick={() => { Haptic.tap(); onNavigate('TRADING'); }}
-            className="touch-target h-8 px-3 rounded-xl bg-surface/60 text-textPrimary text-xs font-semibold active:scale-[0.98] transition-transform"
+            className="touch-target h-8 px-3 rounded-xl exchange-btn-secondary text-textPrimary text-xs font-semibold active:scale-[0.98] transition-transform"
           >
             {t('home_go')}
           </button>
@@ -205,7 +205,7 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
 
       {/* Quick actions grid */}
       <section className="pb-5">
-        <div className="grid grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-4 gap-2">
           {[
             { label: t('deposit'), Icon: ArrowDownLeft, badge: null, onClick: () => onNavigate('DEPOSIT') },
             { label: t('staking_title'), Icon: Gem, badge: null, onClick: () => onNavigate('STAKING') },
@@ -216,17 +216,17 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
               key={label}
               type="button"
               onClick={() => { Haptic.tap(); onClick(); }}
-              className="touch-target rounded-2xl bg-card/35 py-2.5 px-2 flex flex-col items-center justify-center gap-1.5 active:scale-[0.98] transition-transform relative"
+              className="touch-target flex flex-col items-center justify-center gap-2 active:scale-[0.95] transition-transform relative py-1"
             >
               {badge ? (
-                <span className="absolute top-1.5 right-1.5 text-[10px] font-bold text-white bg-neon/90 rounded-md px-1.5 py-0.5">
+                <span className="absolute top-1 right-2 text-[9px] font-bold text-white bg-neon rounded-full px-1.5 py-0.5 z-10">
                   {badge}
                 </span>
               ) : null}
-              <div className="h-9 w-9 rounded-2xl bg-black/20 flex items-center justify-center">
-                <Icon size={17} className="text-textPrimary" />
+              <div className="h-12 w-12 rounded-full bg-white/5 hover:bg-white/8 flex items-center justify-center transition-colors">
+                <Icon size={18} className="text-textPrimary" />
               </div>
-              <span className="text-[11px] text-textPrimary font-medium whitespace-pre-line leading-tight text-center">
+              <span className="text-[11px] text-textSecondary font-semibold tracking-tight text-center leading-none">
                 {label}
               </span>
             </button>
@@ -250,7 +250,7 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             try { localStorage.removeItem('etoro_active_deposit'); } catch {}
             onNavigate('DEPOSIT');
           }}
-          className="w-full text-left rounded-3xl overflow-hidden bg-card/35 active:scale-[0.99] transition-transform"
+          className="w-full text-left rounded-2xl overflow-hidden exchange-card active:scale-[0.99] transition-transform"
           aria-label={t('special_offer')}
         >
           <div className="relative">
@@ -269,9 +269,9 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             </div>
 
             <div className="absolute left-4 bottom-4">
-              <div className="inline-flex items-center gap-2 px-3 h-9 rounded-full bg-neon text-black text-sm font-semibold shadow-sm shadow-neon/20">
+              <div className="inline-flex items-center gap-2 px-3 h-8.5 rounded-full bg-neon text-black text-xs font-bold">
                 {workerEvent?.bonus ? workerEvent.bonus : t('quick_deposit')}
-                <ArrowDownLeft size={16} />
+                <ArrowDownLeft size={14} />
               </div>
             </div>
           </div>
@@ -288,9 +288,9 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             showCloseButton
             stickyHeader={false}
             showHeaderDivider={false}
-            contentClassName="bg-background max-w-none"
+            contentClassName="bg-[#06090e] max-w-none"
           >
-            <div className="-m-3">
+            <div className="-m-4">
               <div className="relative w-full aspect-video bg-black/40 overflow-hidden">
                 <img
                   src={workerEvent.image_url}
@@ -301,9 +301,9 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
                 {workerEvent.bonus ? (
-                  <div className="absolute left-4 bottom-4 inline-flex items-center gap-2 px-3 h-9 rounded-full bg-neon text-black text-sm font-semibold shadow-sm shadow-neon/20">
+                  <div className="absolute left-4 bottom-4 inline-flex items-center gap-2 px-3 h-8.5 rounded-full bg-neon text-black text-xs font-bold">
                     {workerEvent.bonus}
-                    <Gift size={16} />
+                    <Gift size={14} />
                   </div>
                 ) : null}
               </div>

@@ -128,7 +128,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
   const [unstakeTicker, setUnstakeTicker] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { requirePin } = usePin();
-  const { tgid } = useUser();
+  const { user, tgid } = useUser();
   const { webUserId } = useWebAuth();
   const pinUserId = String(tgid ?? webUserId ?? '');
   const rubPerUsd = rates?.usd?.rub ?? null;
@@ -400,23 +400,28 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
       <header
         className={[
           'sticky top-0 z-40 transition-transform duration-200',
-          'bg-background',
+          'bg-background/85 backdrop-blur-xl',
           'hairline-bottom',
         ].join(' ')}
       >
         {/* Combined search and tabs */}
         <div className="px-4 lg:px-6 pt-3 pb-2 max-w-2xl w-full mx-auto">
           {/* Search input */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-3 mb-3">
             <button
               type="button"
               onClick={() => { Haptic.tap(); onNavigate?.('PROFILE'); }}
-              className="h-8 w-8 rounded-full bg-surface/60 flex items-center justify-center text-textSecondary active:scale-95 transition-transform"
+              className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
+              aria-label={t('profile')}
             >
-              <User size={16} />
+              {user?.photo_url ? (
+                <img src={user.photo_url} alt="" className="h-7 w-7 rounded-full object-cover" />
+              ) : (
+                <User size={20} className="text-textSecondary" />
+              )}
             </button>
             <div className="flex-1 relative">
-              <div className="w-full h-8 rounded-2xl bg-surface/60 flex items-center gap-2 px-3 transition-transform">
+              <div className="w-full h-10 rounded-xl bg-white/5 flex items-center gap-2 px-3 transition-transform">
                 <Search size={16} className="text-textSubtle shrink-0" />
                 <input
                   type="search"
@@ -442,14 +447,15 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
             <button
               type="button"
               onClick={() => { Haptic.tap(); onNavigate?.('SUPPORT'); }}
-              className="h-8 w-8 rounded-full bg-surface/60 flex items-center justify-center text-textSecondary active:scale-95 transition-transform"
+              className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all text-textSecondary hover:text-textPrimary"
+              aria-label={t('support')}
             >
-              <Headphones size={16} />
+              <Headphones size={20} />
             </button>
           </div>
 
           {/* Primary tabs with pills */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/[0.02] overflow-x-auto no-scrollbar">
             {(
               [
                 ['favorites', t('markets_tab_favorites')],
@@ -467,10 +473,10 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
                     Haptic.tap();
                     setPrimaryTab(id);
                   }}
-                  className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+                  className={`flex-1 text-center whitespace-nowrap px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-all active:scale-[0.98] ${
                     active
-                      ? 'bg-neon/10 text-neon border border-neon/20'
-                      : 'text-textSubtle hover:text-textSecondary hover:bg-white/[0.04]'
+                      ? 'bg-white/10 text-white'
+                      : 'text-textSubtle hover:text-textSecondary'
                   }`}
                 >
                   {label}
@@ -482,7 +488,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
 
         {/* Sort chips - compact horizontal scroll */}
         <div className="px-4 lg:px-6 max-w-2xl w-full mx-auto pb-2">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {(primaryTab === 'crypto' || primaryTab === 'favorites' || primaryTab === 'stocks'
               ? cryptoSortChips
               : nftSortChips
@@ -502,10 +508,10 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
                       setNftSort(chip.key as NftMarketsSort);
                     }
                   }}
-                  className={`whitespace-nowrap shrink-0 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                  className={`whitespace-nowrap shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all active:scale-[0.98] ${
                     active
-                      ? 'bg-white/[0.08] text-textPrimary border border-white/[0.08]'
-                      : 'text-textSubtle hover:text-textSecondary hover:bg-white/[0.04]'
+                      ? 'bg-white/10 text-white'
+                      : 'text-textSubtle hover:text-textSecondary hover:bg-white/[0.03]'
                   }`}
                 >
                   {chip.label}

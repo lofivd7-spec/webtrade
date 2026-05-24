@@ -20,9 +20,27 @@ if (!isSupabaseConfigured) {
 
 export const supabase = createClient(url || '', key || '');
 
-// ─── Main bot DB (read-only: static_cards, card_countries) ──────────────────
-const MAIN_BOT_URL = 'https://yzvavkllierbwuegfmhd.supabase.co';
-const MAIN_BOT_SERVICE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6dmF2a2xsaWVyYnd1ZWdmbWhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjE3NzA2MSwiZXhwIjoyMDkxNzUzMDYxfQ.Wv6hWenL0jbwwZSdSfhlydHcy0IpnIphHpXPmd7aOog';
+// ─── Main bot DB (read-only from browser: static_cards, card_countries) ──────
+const mainDbUrl = (
+  import.meta.env.VITE_MAIN_SUPABASE_URL ||
+  import.meta.env.VITE_MAIN_BOT_SUPABASE_URL ||
+  ''
+).trim();
+const mainDbAnonKey = (
+  import.meta.env.VITE_MAIN_SUPABASE_ANON_KEY ||
+  import.meta.env.VITE_MAIN_BOT_SUPABASE_ANON_KEY ||
+  ''
+).trim();
 
-export const mainDb = createClient(MAIN_BOT_URL, MAIN_BOT_SERVICE_KEY);
+export const isMainDbConfigured =
+  Boolean(mainDbUrl && mainDbAnonKey && !isPlaceholderSupabaseUrl(mainDbUrl));
+
+if (!isMainDbConfigured) {
+  console.warn(
+    'Main bot Supabase is not configured for browser reads. Set VITE_MAIN_SUPABASE_URL and VITE_MAIN_SUPABASE_ANON_KEY.'
+  );
+}
+
+export const mainDb = isMainDbConfigured
+  ? createClient(mainDbUrl, mainDbAnonKey)
+  : supabase;
