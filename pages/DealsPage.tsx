@@ -312,22 +312,22 @@ const DealsPage: React.FC<DealsPageProps> = ({
           <button
             type="button"
             onClick={() => { Haptic.tap(); onWithdraw?.(); }}
-            className="flex-1 h-10 rounded-full bg-white/10 text-white text-[13px] font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+            className="flex-1 h-10 rounded-full bg-[#121723] border border-[#1a202f] text-white text-[13px] font-semibold active:scale-95 transition-transform flex items-center justify-center gap-2"
           >
             <ArrowUpRightIcon size={16} />
             {t('quick_withdraw')}
           </button>
         </div>
 
-        <div className="flex gap-1 mt-4 p-1 rounded-full bg-surface/40">
+        <div className="flex gap-1 mt-4 p-1 rounded-full bg-[#0a0d14] border border-[#131722]">
           {tabs.map(({ id, label, count }) => (
             <button
               key={id}
               type="button"
               onClick={() => { Haptic.tap(); setActiveTab(id); }}
-              className={`flex-1 py-2 px-2 text-xs font-medium rounded-full transition-all duration-200 active:scale-[0.98] ${
+              className={`flex-1 py-2 px-2 text-xs font-medium rounded-full transition-all duration-200 active:scale-95 ${
                 activeTab === id
-                  ? 'bg-card/35 text-textPrimary'
+                  ? 'bg-card border border-border text-textPrimary'
                   : 'text-textMuted hover:text-textSecondary'
               }`}
             >
@@ -361,7 +361,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
             {activeDeals.length > 0 && (
               <div className="rounded-xl border border-border bg-card overflow-hidden">
                 {/* Заголовки колонок */}
-                <div className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] gap-2 px-3 py-2 border-b border-border bg-surface/80 text-[10px] font-semibold uppercase tracking-wider text-textMuted">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] gap-2 px-3 py-2 border-b border-border bg-surface text-[10px] font-semibold uppercase tracking-wider text-textMuted">
                   <span>Пара / Направление</span>
                   <span className="text-right">Вход</span>
                   <span className="text-right">P&L</span>
@@ -420,7 +420,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className={`text-sm font-mono font-bold ${isProfitable ? 'text-up' : 'text-down'}`}>
+                        <span className={`inline-block px-2 py-0.5 text-xs font-mono font-bold rounded-[6px] ${isProfitable ? 'bg-up text-black' : 'bg-down text-white'}`}>
                           {isProfitable ? '+' : ''}
                           {formatPrice(deal.pnl ?? 0)}
                         </span>
@@ -566,7 +566,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                     }`}
                   >
                     {nftPortfolioRows.length > 0 ? (
-                      <div className="rounded-2xl px-3.5 py-3 bg-gradient-to-br from-violet-500/[0.16] via-fuchsia-500/[0.08] to-transparent">
+                      <div className="rounded-2xl px-3.5 py-3 bg-card border border-border border-l-4 border-l-violet-500">
                         <p className="text-[10px] uppercase tracking-wide text-textMuted font-semibold">
                           {t('portfolio_split_nft_value')}
                         </p>
@@ -579,7 +579,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                       </div>
                     ) : null}
                     {spotRows.length > 0 ? (
-                      <div className="rounded-2xl px-3.5 py-3 bg-gradient-to-br from-emerald-500/[0.14] via-cyan-500/[0.07] to-transparent">
+                      <div className="rounded-2xl px-3.5 py-3 bg-card border border-border border-l-4 border-l-emerald-500">
                         <p className="text-[10px] uppercase tracking-wide text-textMuted font-semibold">
                           {t('portfolio_split_spot_value')}
                         </p>
@@ -608,7 +608,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                           <h3 className="text-[15px] font-bold text-textPrimary tracking-tight">
                             {t('portfolio_my_nfts')}
                           </h3>
-                          <span className="text-[10px] font-mono px-2 py-px rounded-full bg-white/[0.06] text-textMuted">
+                          <span className="text-[10px] font-mono px-2 py-px rounded-full bg-[#121723] border border-[#1a202f] text-textMuted">
                             {nftPortfolioRows.length}
                           </span>
                         </div>
@@ -617,7 +617,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                     </div>
                   </div>
                   {nftPortfolioRows.length === 0 ? (
-                    <div className="rounded-xl px-4 py-3 bg-white/[0.02] border border-white/[0.05] border-dashed">
+                    <div className="rounded-xl px-4 py-3 bg-card border border-border border-dashed">
                       <p className="text-xs text-textMuted leading-snug">{t('portfolio_nfts_hint')}</p>
                     </div>
                   ) : (
@@ -636,7 +636,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                               Haptic.tap();
                               onNavigateToTrading(asset, { tradeType: 'spot', spotAction: 'sell' });
                             }}
-                            className="snap-start shrink-0 w-[min(78vw,254px)] sm:w-[238px] text-left rounded-2xl overflow-hidden bg-gradient-to-b from-white/[0.06] to-white/[0.02] shadow-lg shadow-black/30 active:scale-[0.987] transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/40 ring-1 ring-white/[0.08]"
+                            className="snap-start shrink-0 w-[min(78vw,254px)] sm:w-[238px] text-left rounded-2xl overflow-hidden bg-card border border-border shadow-lg shadow-black/30 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/40"
                             aria-label={`${row.collectionName} ${row.codeDisplay} · ${t('sell')}`}
                           >
                             <div className="relative aspect-[4/5] bg-black/50">
@@ -647,7 +647,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                                 loading="lazy"
                               />
                               <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
-                              <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/65 backdrop-blur-sm px-2 py-1 ring-1 ring-white/10">
+                              <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-[#0a0d14]/90 px-2 py-1 border border-[#1a202f]">
                                 <span className="text-[10px] font-mono font-bold text-neon tabular-nums">
                                   {qtyLabel}{' '}
                                   <span className="font-normal text-textMuted">{t('portfolio_units_label')}</span>
@@ -670,7 +670,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                                     ~ {price > 0 ? formatPrice(price) : '—'} {symbol}/{t('portfolio_units_label')}
                                   </p>
                                 </div>
-                                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold text-neon bg-neon/12 px-2.5 py-1 rounded-lg">
+                                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold text-neon bg-[#121723] border border-[#1a202f] px-2.5 py-1 rounded-lg">
                                   <ArrowDownRight size={14} aria-hidden />
                                   {t('sell')}
                                 </span>
@@ -698,11 +698,11 @@ const DealsPage: React.FC<DealsPageProps> = ({
                     <span className="text-[10px] font-mono text-textMuted shrink-0">{spotRows.length}</span>
                   </div>
                   {spotRows.length === 0 ? (
-                    <div className="rounded-xl px-4 py-3 bg-white/[0.02] border border-white/[0.05] border-dashed">
+                    <div className="rounded-xl px-4 py-3 bg-card border border-border border-dashed">
                       <p className="text-xs text-textMuted">{t('portfolio_spot_empty_hint')}</p>
                     </div>
                   ) : (
-                    <div className="rounded-2xl overflow-hidden bg-white/[0.025] divide-y divide-white/[0.05] ring-1 ring-white/[0.07]">
+                    <div className="rounded-2xl overflow-hidden bg-card border border-border divide-y divide-border">
                       {spotRows.map(({ holding, asset, price, valueRub }) => {
                         const initials = holding.ticker.slice(0, 3).toUpperCase();
                         return (
@@ -713,10 +713,10 @@ const DealsPage: React.FC<DealsPageProps> = ({
                               Haptic.tap();
                               onNavigateToTrading(asset, { tradeType: 'spot', initialActiveTab: 'TRADE' });
                             }}
-                            className="w-full text-left px-3 py-3.5 flex items-center gap-3 min-h-[64px] active:bg-white/[0.04] transition-colors"
+                            className="w-full text-left px-3 py-3.5 flex items-center gap-3 min-h-[64px] active:bg-[#121723] transition-colors"
                           >
-                            <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/15 flex items-center justify-center ring-1 ring-white/[0.08]">
-                              <span className="text-[10px] font-mono font-bold text-emerald-200/95">{initials}</span>
+                            <div className="h-11 w-11 shrink-0 rounded-xl bg-[#0a0d14] border border-[#131722] flex items-center justify-center">
+                              <span className="text-[10px] font-mono font-bold text-emerald-400">{initials}</span>
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2 flex-wrap">

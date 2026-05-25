@@ -2,12 +2,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #06090e;
+  --color-background: #04060a;
   --color-surface: #0a0d14;
-  --color-card: #0e111a;
-  --color-border: rgba(255, 255, 255, 0.04);
-  --color-surfaceElevated: #111522;
-  --color-subtle: #090c12;
+  --color-card: #0f121a;
+  --color-border: #131722;
+  --color-surfaceElevated: #111420;
+  --color-subtle: #06080c;
   --color-neon: #1b8eff;
   --color-accent: #2A7BFF;
   --color-accentMuted: rgba(42, 123, 255, 0.06);
@@ -19,18 +19,24 @@
   --color-textMuted: #6b7c96;
   --color-textSubtle: #52637a;
   --color-textCaption: #788ba3;
-  --color-hairline: rgba(255, 255, 255, 0.02);
-  --color-hairlineStrong: rgba(255, 255, 255, 0.05);
-  --color-divider: rgba(255, 255, 255, 0.035);
+  --color-hairline: #0a0d14;
+  --color-hairlineStrong: #131722;
+  --color-divider: #0f121a;
   --color-icon: rgba(234, 244, 255, 0.95);
   --color-icon-muted: rgba(144, 162, 184, 0.9);
   --color-icon-subtle: rgba(107, 124, 150, 0.9);
   --font-family-sans: "Manrope", "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-family-mono: "JetBrains Mono", "SF Mono", "Menlo", monospace;
-  --radius-card: 14px;
-  --radius-modal: 16px;
-  --radius-strict: 8px;
-  --shadow-glass: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --radius-card: 20px;
+  --radius-modal: 24px;
+  --radius-strict: 14px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-3xl: 36px;
+  --shadow-glass: 0 0 0 1px #1a202f;
   --shadow-elevation-1: 0 4px 20px rgba(0, 0, 0, 0.2);
   --shadow-elevation-2: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-elevation-3: 0 16px 48px rgba(0, 0, 0, 0.4);
@@ -232,18 +238,29 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
 .animate-list-item-d5 { animation-delay: 0.25s; }
 
 /* Splash screen specific */
-@keyframes splash-logo-in {
-  0% { opacity: 0; transform: scale(0.88) translateY(10px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes premium-logo-in {
+  0% { opacity: 0; transform: scale(0.95); filter: blur(4px); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
 }
-.animate-splash-logo { animation: splash-logo-in 0.55s cubic-bezier(0.2, 0.9, 0.2, 1) 0.1s both; }
+.animate-premium-logo {
+  animation: premium-logo-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
-@keyframes splash-bar {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(20%); }
-  100% { transform: translateX(110%); }
+@keyframes premium-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-.animate-splash-bar { animation: splash-bar 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-premium-spin {
+  animation: premium-spin 0.85s linear infinite;
+}
+
+@keyframes premium-fade-in {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-premium-fade-in {
+  animation: premium-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
 
 /* ==========================================
    Transitions
@@ -302,8 +319,17 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
   animation: nav-active-pop 220ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
+@keyframes nav-bounce {
+  0% { transform: scale(0.85); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.animate-nav-bounce {
+  animation: nav-bounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
 .nav-icon-pill {
-  background: rgba(27, 142, 255, 0.08);
+  background: transparent;
   border: none !important;
   box-shadow: none !important;
   border-radius: 12px;
@@ -496,7 +522,7 @@ button, a, [role="button"], .cursor-pointer { touch-action: manipulation; -webki
 }
 
 /* Professional Matte Input & Dropdown Styling */
-input[type="text"], input[type="number"], input[type="password"], input[type="email"], input[type="numeric"], select, textarea {
+input[type="text"]:not(.bg-transparent), input[type="number"]:not(.bg-transparent), input[type="password"]:not(.bg-transparent), input[type="email"]:not(.bg-transparent), input[type="numeric"]:not(.bg-transparent), select, textarea {
   border-radius: 10px !important;
   background-color: rgba(255, 255, 255, 0.015) !important;
   border: 1px solid rgba(255, 255, 255, 0.045) !important;
@@ -504,7 +530,7 @@ input[type="text"], input[type="number"], input[type="password"], input[type="em
   transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="numeric"]:focus, select:focus, textarea:focus {
+input[type="text"]:not(.bg-transparent):focus, input[type="number"]:not(.bg-transparent):focus, input[type="password"]:not(.bg-transparent):focus, input[type="email"]:not(.bg-transparent):focus, input[type="numeric"]:not(.bg-transparent):focus, select:focus, textarea:focus {
   border-color: rgba(27, 142, 255, 0.45) !important;
   background-color: rgba(255, 255, 255, 0.025) !important;
   box-shadow: 0 0 0 3px rgba(27, 142, 255, 0.08) !important;
@@ -518,5 +544,94 @@ button[aria-label="Назад"], button[aria-label="Back"] {
 }
 button[aria-label="Назад"]:hover, button[aria-label="Back"]:hover {
   color: var(--color-textPrimary) !important;
-  background-color: rgba(255, 255, 255, 0.04) !important;
+  background-color: #1b2131 !important;
 }
+
+/* ==========================================================================
+   Custom High-Rounding & Solid Matte Grey Redesign Overrides
+   ========================================================================== */
+
+/* 1. Eliminate Transparent Glass Backgrounds with Solid Premium Matte Grey */
+.bg-white\/5 {
+  background-color: #121723 !important;
+}
+.bg-white\/\[0\.05\] {
+  background-color: #121723 !important;
+}
+.bg-white\/10 {
+  background-color: #1a202f !important;
+}
+.bg-white\/\[0\.03\] {
+  background-color: #0e121b !important;
+}
+.bg-white\/\[0\.02\] {
+  background-color: #0a0c13 !important;
+}
+.bg-black\/20 {
+  background-color: #080b11 !important;
+}
+.bg-black\/25 {
+  background-color: #080b11 !important;
+}
+.bg-black\/40 {
+  background-color: #06090e !important;
+}
+
+/* Active and Hover states for transparent overrides */
+.hover\:bg-white\/5:hover, .hover\:bg-white\/8:hover {
+  background-color: #1a2031 !important;
+}
+.hover\:bg-card:hover {
+  background-color: #1a202f !important;
+}
+.active\:scale-95:active, .active\:scale-\[0\.98\]:active, .active\:scale-\[0\.95\]:active, .active\:scale-\[0\.99\]:active {
+  transform: scale(0.96) !important;
+}
+
+/* 2. Universal High-Rounding for Buttons & Interactive Controls */
+.mexc-btn, .exchange-btn, button.touch-target, button.exchange-btn {
+  border-radius: 9999px !important; /* Forces a beautiful fully rounded pill shape */
+}
+
+/* 3. Highly Rounded Input Fields and Selection Dropdowns */
+input[type="text"]:not(.bg-transparent), input[type="number"]:not(.bg-transparent), input[type="password"]:not(.bg-transparent), input[type="email"]:not(.bg-transparent), input[type="numeric"]:not(.bg-transparent), select, textarea, .mexc-input, .exchange-input {
+  border-radius: 16px !important;
+  background-color: #0a0d14 !important;
+  border: 1px solid #1a202f !important;
+}
+
+/* Fully rounded search input shapes */
+.w-full.h-10.rounded-xl.bg-white\/5, .w-full.h-9.rounded-full.bg-white\/5, .w-full.h-9.rounded-full {
+  border-radius: 9999px !important;
+  background-color: #121723 !important;
+  border: 1px solid #1a202f !important;
+}
+
+/* 4. Drastically Increased Card, Panel, Modal & Widget Rounding */
+.rounded-xl {
+  border-radius: 20px !important; /* Standard card/block rounding */
+}
+.rounded-2xl {
+  border-radius: 26px !important; /* Large banners/modal rounding */
+}
+.rounded-lg {
+  border-radius: 14px !important; /* Smaller list items/indicators */
+}
+
+/* 5. Solidified Borders and Dividers (Zero Transparency) */
+.border-neutral-800, .border-neutral-700, .border-neutral-900, .border-neutral-600, .border-border, .border-white\/\[0\.06\], .border-white\/10, .border-white\/\[0\.08\] {
+  border-color: #1a202f !important;
+}
+
+.hairline-top {
+  box-shadow: inset 0 1px 0 0 #151a27 !important;
+}
+
+.hairline-bottom {
+  box-shadow: inset 0 -1px 0 0 #151a27 !important;
+}
+
+.border-t.border-white\/\[0\.025\] {
+  border-top-color: #1a202f !important;
+}
+

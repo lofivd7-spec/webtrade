@@ -322,12 +322,6 @@ const DealDetailSheet: React.FC<{
 
         <div className="px-5 pt-3 pb-6">
           <div className="flex items-center gap-3 mb-5">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0"
-              style={{ backgroundColor: deal.avatarColor }}
-            >
-              {deal.avatarInitial}
-            </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-white text-base">{deal.sellerName}</span>
@@ -1107,13 +1101,7 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div
-                          className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-[11px] shrink-0"
-                          style={{ backgroundColor: deal.avatarColor }}
-                        >
-                          {deal.avatarInitial}
-                        </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="text-[13px] font-semibold text-textPrimary truncate">{deal.sellerName}</span>
                             <span className="inline-flex items-center gap-1 text-[10px] text-amber-300 font-mono shrink-0">

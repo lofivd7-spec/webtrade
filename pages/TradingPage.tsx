@@ -1309,7 +1309,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
               <>
                 <div className="px-4 pt-2.5 pb-2 flex items-center gap-2 sm:gap-3">
                   <div
-                    className="inline-flex shrink-0 items-center gap-px rounded-[10px] bg-white/[0.04] p-0.5"
+                    className="inline-flex shrink-0 items-center gap-px rounded-[10px] bg-[#0a0d14] border border-[#131722] p-0.5"
                     role="tablist"
                   >
                     <button
@@ -1321,9 +1321,9 @@ const TradingPage: React.FC<TradingPageProps> = ({
                         setTradeType('spot');
                         setActiveTab('TRADE');
                       }}
-                      className={`min-w-[4.75rem] px-3.5 h-8 rounded-[9px] text-[13px] font-semibold tracking-tight transition-colors duration-200 ${
+                      className={`min-w-[4.75rem] px-3.5 h-8 rounded-[9px] text-[13px] font-semibold tracking-tight transition-colors duration-200 active:scale-95 ${
                         tradeType === 'spot'
-                          ? 'text-textPrimary bg-white/[0.11] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]'
+                          ? 'text-textPrimary bg-card border border-border shadow-sm'
                           : 'text-textMuted hover:text-textSecondary'
                       }`}
                     >
@@ -1338,9 +1338,9 @@ const TradingPage: React.FC<TradingPageProps> = ({
                         setTradeType('futures');
                         setActiveTab('TRADE');
                       }}
-                      className={`min-w-[4.75rem] px-3.5 h-8 rounded-[9px] text-[13px] font-semibold tracking-tight transition-colors duration-200 ${
+                      className={`min-w-[4.75rem] px-3.5 h-8 rounded-[9px] text-[13px] font-semibold tracking-tight transition-colors duration-200 active:scale-95 ${
                         tradeType === 'futures'
-                          ? 'text-textPrimary bg-white/[0.11] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]'
+                          ? 'text-textPrimary bg-card border border-border shadow-sm'
                           : 'text-textMuted hover:text-textSecondary'
                       }`}
                     >
@@ -1600,7 +1600,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                           setTradeType('futures');
                           setSide('UP');
                         }}
-                        className="flex-1 h-9 rounded-xl bg-up text-black font-bold text-[12px] active:scale-[0.98] transition-transform shadow-elevation-2"
+                        className="flex-1 h-9 rounded-full bg-up text-black font-bold text-[12px] active:scale-95 transition-all shadow-elevation-2"
                       >
                         {t('open_long')}
                       </button>
@@ -1612,14 +1612,14 @@ const TradingPage: React.FC<TradingPageProps> = ({
                           setTradeType('futures');
                           setSide('DOWN');
                         }}
-                        className="flex-1 h-9 rounded-xl bg-down text-black font-bold text-[12px] active:scale-[0.98] transition-transform shadow-elevation-2"
+                        className="flex-1 h-9 rounded-full bg-down text-white font-bold text-[12px] active:scale-95 transition-all shadow-elevation-2"
                       >
                         {t('open_short')}
                       </button>
                       <button
                         type="button"
                         onClick={() => { Haptic.tap(); setActiveTab('TRADE'); }}
-                        className="h-9 w-12 rounded-xl bg-white/10 border border-white/10 text-textPrimary text-[11px] font-semibold active:scale-[0.98] transition-transform"
+                        className="h-9 w-12 rounded-full bg-[#121723] border border-[#1a202f] text-textPrimary text-[11px] font-semibold active:scale-95 transition-all"
                       >
                         {t('show')}
                       </button>
@@ -1894,7 +1894,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                   Haptic.tap();
                                   setShowSpotConfirm('buy');
                                 }}
-                                className="w-full h-12 rounded-2xl font-bold text-base active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-up text-black shadow-elevation-2"
+                                className="w-full h-12 rounded-full font-bold text-base active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-up text-black shadow-elevation-2"
                               >
                                 {spotLoading ? '...' : `${t('spot_buy')} · ×${nftBuyCalc.qtyWish}`}
                               </button>
@@ -1948,7 +1948,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                     Haptic.tap();
                                     setShowSpotConfirm('buy');
                                   }}
-                                  className="w-full h-12 rounded-2xl font-bold text-base active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-up text-black shadow-elevation-2"
+                                  className="w-full h-12 rounded-full font-bold text-base active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-up text-black shadow-elevation-2"
                                 >
                                   {spotLoading ? '...' : `${t('spot_buy')} ${asset.ticker}`}
                                 </button>
@@ -1960,7 +1960,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                     Haptic.tap();
                                     placeSpotLimitStop();
                                   }}
-                                  className="w-full py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-neon text-black hover:opacity-90 hover-glow"
+                                  className="w-full py-3.5 rounded-full font-bold text-sm uppercase tracking-wide active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-neon text-black hover:opacity-90"
                                 >
                                   {t('place_order_btn')}
                                 </button>
@@ -2059,7 +2059,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                   Haptic.tap();
                                   setShowSpotConfirm('sell');
                                 }}
-                                className="w-full h-12 rounded-2xl font-bold text-base active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-down text-black shadow-elevation-2"
+                                className="w-full h-12 rounded-full font-bold text-base active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-down text-white shadow-elevation-2"
                               >
                                 {spotLoading ? '...' : `${t('spot_sell')} · ×${nftSellRawWish}`}
                               </button>
@@ -2140,7 +2140,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                     Haptic.tap();
                                     setShowSpotConfirm('sell');
                                   }}
-                                  className="w-full h-12 rounded-2xl font-bold text-base active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-down text-black shadow-elevation-2"
+                                  className="w-full h-12 rounded-full font-bold text-base active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-down text-white shadow-elevation-2"
                                 >
                                   {spotLoading ? '...' : `${t('spot_sell')} ${asset.ticker}`}
                                 </button>
@@ -2152,7 +2152,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                     Haptic.tap();
                                     placeSpotLimitStop();
                                   }}
-                                  className="w-full py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-down text-white hover:opacity-90 hover-glow"
+                                  className="w-full py-3.5 rounded-full font-bold text-sm uppercase tracking-wide active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-down text-white hover:opacity-90"
                                 >
                                   {t('place_order_btn')}
                                 </button>
@@ -2349,8 +2349,8 @@ const TradingPage: React.FC<TradingPageProps> = ({
                 <button
                     onClick={handlePreTrade}
                     disabled={tradingBlocked || balanceLoading}
-                    className={`w-full h-12 rounded-2xl font-bold text-base shadow-elevation-2 active:scale-[0.98] transition-all mt-3
-                    ${tradingBlocked ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed' : side === 'UP' ? 'bg-up text-black' : 'bg-down text-black'}`}
+                    className={`w-full h-12 rounded-full font-bold text-base shadow-elevation-2 active:scale-95 transition-all mt-3
+                    ${tradingBlocked ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed' : side === 'UP' ? 'bg-up text-black' : 'bg-down text-white'}`}
                 >
                     {tradingBlocked ? t('trading_blocked') : side === 'UP' ? t('open_long') : t('open_short')}
                 </button>
@@ -2359,7 +2359,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                     type="button"
                     onClick={() => { Haptic.tap(); placeFuturesLimitStop(); }}
                     disabled={tradingBlocked}
-                    className={`w-full py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide shadow-lg active:scale-95 transition-all mt-3 hover-glow
+                    className={`w-full py-3.5 rounded-full font-bold text-sm uppercase tracking-wide shadow-lg active:scale-95 transition-all mt-3
                     ${tradingBlocked ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed' : side === 'UP' ? 'bg-neon text-black hover:opacity-90' : 'bg-down text-white hover:opacity-90'}`}
                 >
                     {t('place_order_btn')}
@@ -2855,14 +2855,14 @@ const TradingPage: React.FC<TradingPageProps> = ({
           title={t('margin_mode_title')}
         >
           <div className="space-y-4 pb-4">
-            <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
+            <div className="flex gap-2 p-1 bg-[#0a0d14] rounded-full border border-[#131722]">
               {(['isolated', 'cross'] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => { Haptic.tap(); setMarginMode(mode); }}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                    marginMode === mode ? 'bg-neon text-black' : 'text-textSecondary hover:bg-white/5'
+                  className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all active:scale-95 ${
+                    marginMode === mode ? 'bg-neon text-black border border-transparent' : 'text-textSecondary hover:bg-[#121723]'
                   }`}
                 >
                   {mode === 'isolated' ? t('margin_isolated') : t('margin_cross')}
@@ -2871,14 +2871,14 @@ const TradingPage: React.FC<TradingPageProps> = ({
             </div>
 
             <div className="space-y-3 px-1">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+              <div className="p-3 rounded-2xl bg-[#0a0d14] border border-[#131722]">
                 <h4 className="text-xs font-bold text-textPrimary mb-1 uppercase tracking-wider">{t('margin_isolated')}</h4>
                 <p className="text-[11px] text-textMuted leading-relaxed">
                   {t('margin_isolated_desc')}
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+              <div className="p-3 rounded-2xl bg-[#0a0d14] border border-[#131722]">
                 <h4 className="text-xs font-bold text-textPrimary mb-1 uppercase tracking-wider">{t('margin_cross')}</h4>
                 <p className="text-[11px] text-textMuted leading-relaxed">
                   {t('margin_cross_desc')}
@@ -2889,7 +2889,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
             <button
               type="button"
               onClick={() => { Haptic.tap(); setShowMarginSheet(false); }}
-              className="w-full h-12 rounded-xl bg-neon text-black font-bold active:scale-95 transition-transform mt-2"
+              className="w-full h-12 rounded-full bg-neon text-black font-bold active:scale-95 transition-transform mt-2"
             >
               {t('confirm')}
             </button>

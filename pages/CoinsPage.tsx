@@ -405,24 +405,24 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
         ].join(' ')}
       >
         {/* Combined search and tabs */}
-        <div className="px-4 lg:px-6 pt-3 pb-2 max-w-2xl w-full mx-auto">
+        <div className="px-4 lg:px-6 pt-2 pb-1.5 max-w-2xl w-full mx-auto">
           {/* Search input */}
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-2.5 mb-2">
             <button
               type="button"
               onClick={() => { Haptic.tap(); onNavigate?.('PROFILE'); }}
-              className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
+              className="touch-target h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
               aria-label={t('profile')}
             >
               {user?.photo_url ? (
-                <img src={user.photo_url} alt="" className="h-7 w-7 rounded-full object-cover" />
+                <img src={user.photo_url} alt="" className="h-6.5 w-6.5 rounded-full object-cover" />
               ) : (
-                <User size={20} className="text-textSecondary" />
+                <User size={18} className="text-textSecondary" />
               )}
             </button>
             <div className="flex-1 relative">
-              <div className="w-full h-10 rounded-xl bg-white/5 flex items-center gap-2 px-3 transition-transform">
-                <Search size={16} className="text-textSubtle shrink-0" />
+              <div className="w-full h-9 rounded-full bg-white/5 flex items-center gap-2 px-3.5 transition-transform">
+                <Search size={14} className="text-textSubtle shrink-0" />
                 <input
                   type="search"
                   inputMode="search"
@@ -431,7 +431,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => Haptic.tap()}
-                  className="bg-transparent outline-none text-sm text-textPrimary placeholder:text-textSubtle w-full min-w-0 font-normal"
+                  className="bg-transparent outline-none text-xs text-textPrimary placeholder:text-textSubtle w-full min-w-0 font-medium"
                 />
                 {searchQuery && (
                   <button
@@ -447,10 +447,10 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
             <button
               type="button"
               onClick={() => { Haptic.tap(); onNavigate?.('SUPPORT'); }}
-              className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all text-textSecondary hover:text-textPrimary"
+              className="touch-target h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all text-textSecondary hover:text-textPrimary"
               aria-label={t('support')}
             >
-              <Headphones size={20} />
+              <Headphones size={18} />
             </button>
           </div>
 

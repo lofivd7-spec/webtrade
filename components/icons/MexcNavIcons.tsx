@@ -26,115 +26,91 @@ function Svg(props: React.SVGProps<SVGSVGElement> & { size?: number }) {
  */
 
 export const NavHomeIcon: React.FC<IconProps> = ({ active = false, className, size = 22 }) => {
-  const fill = active ? 0.22 : 0.12;
-  return (
-    <Svg className={className} size={size} aria-hidden>
-      <path
-        d="M4.2 10.3 11.1 4.6c.55-.46 1.35-.46 1.9 0l6.9 5.7c.34.28.54.7.54 1.15V20a1.7 1.7 0 0 1-1.7 1.7H15a.9.9 0 0 1-.9-.9v-4.8a1.2 1.2 0 0 0-1.2-1.2h-1.8a1.2 1.2 0 0 0-1.2 1.2v4.8a.9.9 0 0 1-.9.9H5.36A1.7 1.7 0 0 1 3.66 20v-8.55c0-.45.2-.87.54-1.15Z"
-        fill="currentColor"
-        opacity={fill}
-      />
-      <path
-        d="M4.2 10.3 11.1 4.6c.55-.46 1.35-.46 1.9 0l6.9 5.7c.34.28.54.7.54 1.15V20a1.7 1.7 0 0 1-1.7 1.7H5.36A1.7 1.7 0 0 1 3.66 20v-8.55c0-.45.2-.87.54-1.15Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
+  if (active) {
+    return (
+      <Svg className={`${className} animate-nav-bounce`} size={size} aria-hidden>
+        <path
+          d="M20 10.75v8.5a1.75 1.75 0 01-1.75 1.75h-3.5a.75.75 0 01-.75-.75v-4.5h-4v4.5a.75.75 0 01-.75.75h-3.5A1.75 1.75 0 014 19.25v-8.5a1.75 1.75 0 01.55-1.25l6.5-5.5a1.75 1.75 0 012.4 0l6.5 5.5c.35.3.55.7.55 1.25z"
+          fill="var(--color-neon)"
+        />
+      </Svg>
+    );
+  } else {
+    return (
+      <Svg className={className} size={size} aria-hidden>
+        <path
+          d="M20 10.75v8.5a1.75 1.75 0 01-1.75 1.75h-3.5a.75.75 0 01-.75-.75v-4.5h-4v4.5a.75.75 0 01-.75.75h-3.5A1.75 1.75 0 014 19.25v-8.5a1.75 1.75 0 01.55-1.25l6.5-5.5a1.75 1.75 0 012.4 0l6.5 5.5c.35.3.55.7.55 1.25z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
+    );
+  }
 };
 
 export const NavMarketsIcon: React.FC<IconProps> = ({ active = false, className, size = 22 }) => {
-  const fill = active ? 0.24 : 0.12;
-  return (
-    <Svg className={className} size={size} aria-hidden>
-      <path
-        d="M6 19a1 1 0 0 1-1-1V6.2c0-.66.54-1.2 1.2-1.2h11.6c.66 0 1.2.54 1.2 1.2V18a1 1 0 0 1-1 1H6Z"
-        fill="currentColor"
-        opacity={fill}
-      />
-      <path
-        d="M7 15.5 10.1 12l2.2 2.2L17.2 8.7"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6.2 5h11.6c.66 0 1.2.54 1.2 1.2V18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6.2C5 5.54 5.54 5 6.2 5Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
+  if (active) {
+    return (
+      <Svg className={`${className} animate-nav-bounce`} size={size} aria-hidden>
+        <rect x="4" y="9" width="3.5" height="11" rx="1" fill="var(--color-neon)" />
+        <rect x="10.25" y="4" width="3.5" height="16" rx="1" fill="var(--color-neon)" />
+        <rect x="16.5" y="12" width="3.5" height="8" rx="1" fill="var(--color-neon)" />
+      </Svg>
+    );
+  } else {
+    return (
+      <Svg className={className} size={size} aria-hidden>
+        <rect x="4" y="9" width="3.5" height="11" rx="1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="10.25" y="4" width="3.5" height="16" rx="1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="16.5" y="12" width="3.5" height="8" rx="1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    );
+  }
 };
 
 export const NavTradeIcon: React.FC<IconProps> = ({ active = false, className, size = 22 }) => {
-  const fill = active ? 0.26 : 0.12;
-  return (
-    <Svg className={className} size={size} aria-hidden>
-      <path
-        d="M7.4 17.8c-.55 0-1-.45-1-1v-8c0-.55.45-1 1-1h9.2c.55 0 1 .45 1 1v8c0 .55-.45 1-1 1H7.4Z"
-        fill="currentColor"
-        opacity={fill}
-      />
-      <path
-        d="M8.5 12.8h7"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M12 7.8V6.1c0-.61.49-1.1 1.1-1.1h4.3c.61 0 1.1.49 1.1 1.1v4.2c0 .61-.49 1.1-1.1 1.1h-1.6"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={0.9}
-      />
-      <path
-        d="M7.4 7.8h9.2c.55 0 1 .45 1 1v8c0 .55-.45 1-1 1H7.4c-.55 0-1-.45-1-1v-8c0-.55.45-1 1-1Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
+  if (active) {
+    return (
+      <Svg className={`${className} animate-nav-bounce`} size={size} aria-hidden>
+        <path d="M8 19V5m0 0L4 9m4-4l4 4" stroke="var(--color-neon)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 5v14m0 0l-4-4m4 4l4-4" stroke="var(--color-neon)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    );
+  } else {
+    return (
+      <Svg className={className} size={size} aria-hidden>
+        <path d="M8 19V5m0 0L4 9m4-4l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 5v14m0 0l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    );
+  }
 };
 
 export const NavWalletIcon: React.FC<IconProps> = ({ active = false, className, size = 22 }) => {
-  const fill = active ? 0.24 : 0.11;
-  return (
-    <Svg className={className} size={size} aria-hidden>
-      <path
-        d="M6.2 7.2h11.2c.88 0 1.6.72 1.6 1.6v8.6c0 .88-.72 1.6-1.6 1.6H6.2c-.88 0-1.6-.72-1.6-1.6V8.8c0-.88.72-1.6 1.6-1.6Z"
-        fill="currentColor"
-        opacity={fill}
-      />
-      <path
-        d="M6.2 7.2h11.2c.88 0 1.6.72 1.6 1.6v8.6c0 .88-.72 1.6-1.6 1.6H6.2c-.88 0-1.6-.72-1.6-1.6V8.8c0-.88.72-1.6 1.6-1.6Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M19 11.2h-3.2c-.88 0-1.6.72-1.6 1.6s.72 1.6 1.6 1.6H19"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={0.95}
-      />
-      <circle cx="15.9" cy="12.8" r="0.9" fill="currentColor" opacity={active ? 0.9 : 0.7} />
-      <path
-        d="M7.2 7.2V6.4c0-.77.63-1.4 1.4-1.4h8.2"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        opacity={0.85}
-      />
-    </Svg>
-  );
+  if (active) {
+    return (
+      <Svg className={`${className} animate-nav-bounce`} size={size} aria-hidden>
+        <path
+          d="M19 5H5a3 3 0 00-3 3v8a3 3 0 003 3h14a3 3 0 003-3V8a3 3 0 00-3-3zm-1.5 8.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"
+          fill="var(--color-neon)"
+        />
+      </Svg>
+    );
+  } else {
+    return (
+      <Svg className={className} size={size} aria-hidden>
+        <path
+          d="M19 5H5a3 3 0 00-3 3v8a3 3 0 003 3h14a3 3 0 003-3V8a3 3 0 00-3-3z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="17.5" cy="12" r="1.5" stroke="currentColor" strokeWidth="1.6" />
+      </Svg>
+    );
+  }
 };
 

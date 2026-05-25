@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
 const STATUSES = [
-  'Connecting to secure server…',
-  'Fetching market data…',
-  'Loading account assets…',
-  'Verifying security protocols…',
-  'Finalizing setup…',
+  'Initializing API connection...',
+  'Synchronizing order books...',
+  'Loading asset balances...',
+  'Securing user environment...',
+  'Finalizing interface...'
 ];
 
 const SplashScreen: React.FC = () => {
   const [statusIdx, setStatusIdx] = useState(0);
-  const [barProgress, setBarProgress] = useState(0);
 
   useEffect(() => {
     let i = 0;
@@ -18,10 +17,8 @@ const SplashScreen: React.FC = () => {
       i++;
       if (i < STATUSES.length) {
         setStatusIdx(i);
-        setBarProgress(Math.min(100, (i / STATUSES.length) * 100));
       } else {
         clearInterval(iv);
-        setBarProgress(100);
       }
     }, 420);
     return () => clearInterval(iv);
@@ -29,55 +26,65 @@ const SplashScreen: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
-      style={{ background: '#070B12' }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center select-none"
+      style={{ background: '#06090e' }}
     >
-      {/* Ambient glow */}
+      {/* Matte ambient depth light */}
       <div
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(42,123,255,0.12) 0%, transparent 70%)',
-          filter: 'blur(40px)',
+          background: 'radial-gradient(circle at 50% 45%, rgba(27, 142, 255, 0.035) 0%, rgba(6, 9, 14, 0) 65%)',
         }}
       />
 
-      {/* Content */}
+      {/* Content Container */}
       <div className="relative z-10 flex flex-col items-center gap-0">
-        {/* Logo */}
+        {/* Sleek Logo */}
         <img
           src="/mexc-logo.png"
           alt="MEXC"
-          className="animate-splash-logo w-52 h-auto"
+          className="animate-premium-logo w-44 h-auto"
         />
 
-        {/* Spacer */}
-        <div className="mt-14 flex flex-col items-center gap-5 w-52">
-          {/* Progress bar track */}
-          <div className="w-full h-[2px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <div
-              className="h-full rounded-full transition-all duration-500 ease-out"
-              style={{
-                width: `${barProgress}%`,
-                background: 'linear-gradient(90deg, #1a5cd0 0%, #2A7BFF 60%, #5aa0ff 100%)',
-                boxShadow: '0 0 8px rgba(42,123,255,0.6)',
-              }}
-            />
+        {/* Loading Indicator and Status - Staggered Fade-in */}
+        <div className="mt-12 flex flex-col items-center gap-6 w-60 animate-premium-fade-in">
+          {/* Elegant High-Precision Circular SVG Spinner */}
+          <div className="relative w-8 h-8 flex items-center justify-center">
+            <svg className="animate-premium-spin w-6 h-6" viewBox="0 0 24 24" fill="none">
+              <circle
+                className="opacity-[0.04]"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="#ffffff"
+                strokeWidth="2"
+              />
+              <path
+                className="opacity-90"
+                fill="#1b8eff"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
           </div>
 
           {/* Status text */}
-          <div className="flex flex-col items-center gap-1.5">
+          <div className="flex flex-col items-center gap-1.5 h-10 justify-center">
             <span
               key={statusIdx}
-              className="text-[10px] font-medium uppercase tracking-[0.28em] text-center animate-fade-in-fast"
-              style={{ color: 'rgba(42,123,255,0.85)' }}
+              className="text-[9.5px] font-mono font-medium uppercase tracking-[0.24em] text-center text-textSecondary animate-fade-in-fast"
             >
               {STATUSES[statusIdx]}
             </span>
-            <span className="text-[9px] uppercase tracking-[0.12em]" style={{ color: 'rgba(110,122,140,0.55)' }}>
-              MEXC Global · Secure Environment
-            </span>
           </div>
         </div>
+      </div>
+
+      {/* Professional Secure Environment Stamp */}
+      <div className="absolute bottom-10 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em] text-textMuted/45 font-mono select-none pointer-events-none animate-premium-fade-in">
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <span>Secure Trading Environment</span>
       </div>
     </div>
   );

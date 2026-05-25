@@ -97,24 +97,24 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
       <header
         className={[
           'sticky top-0 z-40 -mx-4 lg:-mx-6 px-4 lg:px-6',
-          'pt-3 pb-2',
+          'pt-2 pb-1.5',
           'bg-background/85 backdrop-blur-xl',
           'hairline-bottom',
           'transition-transform duration-200',
           topBarHidden ? '-translate-y-full' : 'translate-y-0',
         ].join(' ')}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => { Haptic.tap(); onNavigate('PROFILE'); }}
-            className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
+            className="touch-target h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
             aria-label={t('profile')}
           >
             {user?.photo_url ? (
-              <img src={user.photo_url} alt="" className="h-7 w-7 rounded-full object-cover" />
+              <img src={user.photo_url} alt="" className="h-6.5 w-6.5 rounded-full object-cover" />
             ) : (
-              <User size={20} className="text-textSecondary" />
+              <User size={18} className="text-textSecondary" />
             )}
           </button>
 
@@ -122,13 +122,13 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             <button
               type="button"
               onClick={() => { Haptic.tap(); onSearch(); }}
-              className="w-full h-10 rounded-xl bg-white/5 flex items-center gap-2 px-3 text-left active:scale-[0.99] transition-transform"
+              className="w-full h-9 rounded-full bg-white/5 flex items-center gap-2 px-3.5 text-left active:scale-[0.99] transition-transform"
             >
-              <Search size={16} className="text-textSubtle shrink-0" />
+              <Search size={14} className="text-textSubtle shrink-0" />
               <input
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="bg-transparent outline-none text-sm text-textPrimary placeholder:text-textSubtle w-full min-w-0"
+                className="bg-transparent outline-none text-xs text-textPrimary placeholder:text-textSubtle w-full min-w-0 font-medium"
                 placeholder={t('search')}
               />
             </button>
@@ -138,10 +138,10 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             <button
               type="button"
               onClick={() => { Haptic.tap(); onNavigate('SUPPORT'); }}
-              className="touch-target h-10 w-10 rounded-xl flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all text-textSecondary hover:text-textPrimary"
+              className="touch-target h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all text-textSecondary hover:text-textPrimary"
               aria-label={t('support')}
             >
-              <Headphones size={20} />
+              <Headphones size={18} />
             </button>
           </div>
         </div>
@@ -160,13 +160,9 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
                   {totalAssetsText}
                 </span>
               )}
-              <button
-                type="button"
-                onClick={() => { Haptic.tap(); onCurrencyClick?.(); }}
-                className="flex items-center gap-1 text-textSubtle text-xs leading-none"
-              >
-                <span className="font-medium">{currencyCode}</span>
-              </button>
+              <div className="flex items-center gap-1 text-textSubtle text-xs leading-none">
+                <span className="font-semibold uppercase tracking-wider">{currencyCode}</span>
+              </div>
             </div>
             
 

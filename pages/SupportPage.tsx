@@ -762,16 +762,20 @@ const SupportPage: React.FC<SupportPageProps> = ({ onBack }) => {
       <div className="flex-1 flex flex-col min-h-0">
         <header className="shrink-0 px-4 py-2.5 hairline-bottom bg-background">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-surface flex items-center justify-center text-neon shrink-0">
-              <Headphones size={16} strokeWidth={2} />
+            <div className="h-8 w-8 rounded-full bg-surface flex items-center justify-center text-neon shrink-0 border border-border">
+              <Headphones size={15} strokeWidth={2.2} />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="text-xs font-semibold text-textPrimary tracking-tight leading-tight">
+              <h2 className="text-xs font-bold text-textPrimary tracking-tight leading-tight">
                 {t('support_chat_team')}
               </h2>
-              <p className="text-[11px] text-textMuted mt-0.5 leading-snug line-clamp-2">
-                {t('support_chat_subtitle')}
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5 select-none pointer-events-none">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-400 tracking-wider uppercase">Active Online</span>
+              </div>
             </div>
           </div>
         </header>
@@ -801,24 +805,34 @@ const SupportPage: React.FC<SupportPageProps> = ({ onBack }) => {
           {messages.map((m) => {
             const isUser = m.author === 'user';
             const callLink = extractCallLink(m.text);
+            const timeStr = new Date(m.created_at).toLocaleTimeString(undefined, {
+              hour: '2-digit',
+              minute: '2-digit',
+            });
             return (
-              <div key={m.id} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
+              <div key={m.id} className={`flex w-full mb-1 ${isUser ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                  className={`max-w-[85%] px-3.5 pt-2.5 pb-5 text-[13px] leading-relaxed relative ${
                     isUser
-                      ? 'bg-neon/10 text-textPrimary border border-neon/25 shadow-sm'
-                      : 'bg-card/45 text-textPrimary border border-border shadow-sm'
+                      ? 'bg-neon text-black rounded-2xl rounded-tr-none shadow-sm border-none font-medium'
+                      : 'bg-card text-textPrimary rounded-2xl rounded-tl-none border border-border shadow-sm'
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{m.text}</p>
                   {callLink ? <CallInviteCard url={callLink} /> : null}
                   {m.image_url ? <AttachmentCard url={m.image_url} /> : null}
-                  <p className="mt-2 text-[10px] font-mono tabular-nums text-textMuted">
-                    {new Date(m.created_at).toLocaleTimeString(undefined, {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
+                  
+                  {/* Telegram-style inline bottom-right meta badge */}
+                  <div className="absolute bottom-1 right-2.5 flex items-center gap-0.5 select-none pointer-events-none">
+                    <span className={`text-[8.5px] font-mono font-medium ${isUser ? 'text-black/60' : 'text-textMuted'}`}>
+                      {timeStr}
+                    </span>
+                    {isUser && (
+                      <span className="text-[10px] text-black/60 font-semibold leading-none -mt-0.5" aria-hidden>
+                        ✓✓
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );
