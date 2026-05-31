@@ -801,10 +801,6 @@ const AppContent: React.FC = () => {
     Haptic.success();
   };
 
-  // Пока Supabase грузит пользователя — показываем сплеш-скрин
-  if (loading || !minLoadingDone) {
-    return <SplashScreen />;
-  }
   // Auth gate открывается только при попытке перейти в защищённые разделы
   if (authGateOpen) {
     if (authSubPage === 'login') {
@@ -814,7 +810,9 @@ const AppContent: React.FC = () => {
           onSuccess={() => {
             setAuthGateOpen(false);
             setAuthSubPage(null);
-            if (pendingPage) navigateTo(pendingPage);
+            if (pendingPage) {
+              setCurrentPage(pendingPage);
+            }
             setPendingPage(null);
           }}
           onGoRegister={() => setAuthSubPage('register')}
@@ -831,7 +829,9 @@ const AppContent: React.FC = () => {
           onSuccess={() => {
             setAuthGateOpen(false);
             setAuthSubPage(null);
-            if (pendingPage) navigateTo(pendingPage);
+            if (pendingPage) {
+              setCurrentPage(pendingPage);
+            }
             setPendingPage(null);
           }}
           onGoLogin={() => setAuthSubPage('login')}
@@ -846,6 +846,10 @@ const AppContent: React.FC = () => {
         onRegister={() => setAuthSubPage('register')}
       />
     );
+  }
+  // Пока Supabase грузит пользователя — показываем сплеш-скрин
+  if (loading || !minLoadingDone) {
+    return <SplashScreen />;
   }
   // Гость: показываем приложение с ограниченным функционалом
   if (error && !refId) {

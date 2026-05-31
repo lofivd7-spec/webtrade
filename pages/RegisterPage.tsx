@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import AuthFullScreenLayout from '../components/AuthFullScreenLayout';
 import LegalDocModal, { LegalDocId } from '../components/LegalDocModal';
 import { useWebAuth } from '../context/WebAuthContext';
@@ -13,33 +13,31 @@ interface RegisterPageProps {
   bonus: number | null;
   onBack: () => void;
   onSuccess: () => void;
-  /** Переключение на экран входа */
   onGoLogin?: () => void;
 }
-
-const fieldClass =
-  'exchange-input text-[16px]';
-const labelClass = 'block exchange-label mb-2';
-const errorTextClass = 'mt-2 text-xs text-red-400';
-const errorFieldClass = 'border-red-500/60 focus-visible:ring-red-500/20 focus-visible:border-red-500/60';
 
 function isValidEmail(s: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim().toLowerCase());
 }
 
 function validatePassword(pw: string) {
-  const v = {
+  return {
     len: pw.length >= 8,
     upper: /[A-ZА-Я]/.test(pw),
     lower: /[a-zа-я]/.test(pw),
     num: /\d/.test(pw),
     sym: /[^A-Za-zА-Яа-я0-9]/.test(pw),
   };
-  return v;
 }
 
+const inputClass =
+  'w-full h-12 px-4 rounded-xl bg-[rgba(255,255,255,0.03)] border border-border/60 text-sm text-textPrimary placeholder-textSubtle outline-none transition-all focus:border-neon/50 focus:bg-[rgba(255,255,255,0.05)] focus:shadow-[0_0_0_1px_rgba(27,142,255,0.15)]';
+
+const errorInputClass =
+  'border-red-500/40 focus:border-red-500/60 focus:shadow-[0_0_0_1px_rgba(239,68,68,0.15)]';
+
 const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuccess, onGoLogin }) => {
-  const { register, login, resendEmailConfirmation } = useWebAuth();
+  const { register } = useWebAuth();
   const toast = useToast();
   const { t } = useLanguage();
   const [email, setEmail] = useState('');
@@ -49,30 +47,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [legal, setLegal] = useState<LegalDocId | null>(null);
-  const [step, setStep] = useState<'form' | 'confirm_email'>('form');
-  const [resending, setResending] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passError, setPassError] = useState<string | null>(null);
   const [pass2Error, setPass2Error] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPassword2, setShowPassword2] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [rateLimitCooldown, setRateLimitCooldown] = useState(0);
-  const cooldownRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startCooldown = useCallback((seconds: number) => {
-    setRateLimitCooldown(seconds);
-    if (cooldownRef.current) clearInterval(cooldownRef.current);
-    cooldownRef.current = setInterval(() => {
-      setRateLimitCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(cooldownRef.current!);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
 
   const refCode = (refId || '').trim();
 
@@ -84,22 +61,19 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
-    if (step !== 'form') return;
     const trimmed = email.trim().toLowerCase();
     setEmailError(null);
     setPassError(null);
     setPass2Error(null);
-    if (!trimmed) setEmailError(t('auth_enter_email'));
-    else if (!isValidEmail(trimmed)) setEmailError(t('auth_email_invalid'));
+    let hasError = false;
+    if (!trimmed) { setEmailError(t('auth_enter_email')); hasError = true; }
+    else if (!isValidEmail(trimmed)) { setEmailError(t('auth_email_invalid')); hasError = true; }
     const pv = validatePassword(password);
-    if (!password) setPassError(t('auth_enter_password'));
-    else if (!pv.len) setPassError(t('auth_password_min8'));
-    if (!confirmPassword) setPass2Error(t('auth_repeat_password'));
-    else if (password !== confirmPassword) setPass2Error(t('auth_passwords_mismatch'));
-    if (!trimmed || !isValidEmail(trimmed) || !pv.len || password !== confirmPassword) {
-      toast.show(t('auth_check_fields'), 'error');
-      return;
-    }
+    if (!password) { setPassError(t('auth_enter_password')); hasError = true; }
+    else if (!pv.len) { setPassError(t('auth_password_min8')); hasError = true; }
+    if (!confirmPassword) { setPass2Error(t('auth_repeat_password')); hasError = true; }
+    else if (password !== confirmPassword) { setPass2Error(t('auth_passwords_mismatch')); hasError = true; }
+    if (hasError) return;
     if (!agreeTos || !agreePrivacy) {
       toast.show(t('auth_accept_terms_privacy'), 'error');
       return;
@@ -108,20 +82,12 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
     setLoading(true);
     try {
       const fullName = displayNameFromEmail(trimmed);
-      const { ok, error, requiresEmailConfirmation } = await register(trimmed, password, fullName, refCode, bonus);
+      const { ok, error } = await register(trimmed, password, fullName, refCode, bonus);
 
       if (ok) {
-        if (requiresEmailConfirmation) {
-          setStep('confirm_email');
-          setShowConfirmModal(true);
-          toast.show(t('auth_email_sent_confirm'), 'success');
-          return;
-        }
         toast.show(t('auth_account_created'), 'success');
         onSuccess();
       } else {
-        const isRateLimit = error?.toLowerCase().includes('слишком много') || error?.toLowerCase().includes('rate limit');
-        if (isRateLimit) startCooldown(90);
         toast.show(error || t('auth_error_register'), 'error');
       }
     } catch (err: unknown) {
@@ -135,12 +101,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
   return (
     <>
       <AuthFullScreenLayout onBack={onBack} title={t('auth_register_title')} subtitle={t('auth_register_subtitle')}>
-        {step === 'form' ? (
-          <form onSubmit={handleSubmit} className="exchange-card p-4 sm:p-5 space-y-5 pt-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className={labelClass} htmlFor="reg-email">
-              Email
-            </label>
+            <label className="block text-xs font-medium text-textMuted mb-1.5 tracking-wide">Email</label>
             <input
               id="reg-email"
               type="email"
@@ -149,229 +112,87 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@gmail.com"
-              className={`${fieldClass} ${emailError ? errorFieldClass : ''}`}
+              className={`${inputClass} ${emailError ? errorInputClass : ''}`}
             />
-            {emailError ? <div className={errorTextClass}>{emailError}</div> : null}
-          </div>
-          <div>
-            <label className={labelClass} htmlFor="reg-pass">
-              {t('password_label')}
-            </label>
-            <div className="relative">
-              <input
-                id="reg-pass"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Минимум 8 символов"
-                className={`${fieldClass} pr-12 ${passError ? errorFieldClass : ''}`}
-              />
-              <button
-                type="button"
-                aria-label={showPassword ? t('hide_password') : t('show_password')}
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-textMuted hover:text-textPrimary transition-colors"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            {passError ? <div className={errorTextClass}>{passError}</div> : null}
-            <div className="mt-2 text-xs text-textMuted">
-              Подсказка: добавьте цифру и символ (например, <span className="font-mono text-white">A1!</span>), чтобы пароль был надёжнее.
-            </div>
-          </div>
-          <div>
-            <label className={labelClass} htmlFor="reg-pass2">
-              {t('confirm_password_label')}
-            </label>
-            <div className="relative">
-              <input
-                id="reg-pass2"
-                type={showPassword2 ? 'text' : 'password'}
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Повторите пароль"
-                className={`${fieldClass} pr-12 ${pass2Error ? errorFieldClass : ''}`}
-              />
-              <button
-                type="button"
-                aria-label={showPassword2 ? t('hide_password') : t('show_password')}
-                onClick={() => setShowPassword2((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-textMuted hover:text-textPrimary transition-colors"
-              >
-                {showPassword2 ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            {pass2Error ? <div className={errorTextClass}>{pass2Error}</div> : null}
+            {emailError ? <p className="mt-1.5 text-xs text-red-400">{emailError}</p> : null}
           </div>
 
-          <label className="flex items-start gap-3 cursor-pointer group min-h-[44px]">
+          <div>
+            <label className="block text-xs font-medium text-textMuted mb-1.5 tracking-wide">{t('password_label')}</label>
             <input
-              type="checkbox"
-              checked={agreeTos}
-              onChange={(e) => setAgreeTos(e.target.checked)}
-              className="mt-1 h-5 w-5 rounded border-border accent-neon flex-shrink-0"
+              id="reg-pass"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Минимум 8 символов"
+              className={`${inputClass} ${passError ? errorInputClass : ''}`}
             />
-            <span className="text-sm text-textSecondary leading-snug">
-              Я согласен с{' '}
-              <button
-                type="button"
-                className="text-neon hover:underline font-medium"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  setLegal('tos');
-                }}
-              >
-                Terms of Service
-              </button>
-            </span>
-          </label>
-          <label className="flex items-start gap-3 cursor-pointer group min-h-[44px]">
+            {passError ? <p className="mt-1.5 text-xs text-red-400">{passError}</p> : null}
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-textMuted mb-1.5 tracking-wide">{t('confirm_password_label')}</label>
             <input
-              type="checkbox"
-              checked={agreePrivacy}
-              onChange={(e) => setAgreePrivacy(e.target.checked)}
-              className="mt-1 h-5 w-5 rounded border-border accent-neon flex-shrink-0"
+              id="reg-pass2"
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Повторите пароль"
+              className={`${inputClass} ${pass2Error ? errorInputClass : ''}`}
             />
-            <span className="text-sm text-textSecondary leading-snug">
-              Я согласен с{' '}
-              <button
-                type="button"
-                className="text-neon hover:underline font-medium"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  setLegal('privacy');
-                }}
-              >
-                Privacy Policy
-              </button>
-            </span>
-          </label>
+            {pass2Error ? <p className="mt-1.5 text-xs text-red-400">{pass2Error}</p> : null}
+          </div>
+
+          <div className="space-y-3 pt-1">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreeTos}
+                onChange={(e) => setAgreeTos(e.target.checked)}
+                className="w-4 h-4 rounded border-border/80 bg-transparent accent-neon"
+              />
+              <span className="text-xs text-textSecondary leading-snug select-none">
+                Я согласен с{' '}
+                <button type="button" className="text-neon hover:underline font-medium" onClick={(e) => { e.preventDefault(); setLegal('tos'); }}>
+                  Terms of Service
+                </button>
+              </span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreePrivacy}
+                onChange={(e) => setAgreePrivacy(e.target.checked)}
+                className="w-4 h-4 rounded border-border/80 bg-transparent accent-neon"
+              />
+              <span className="text-xs text-textSecondary leading-snug select-none">
+                Я согласен с{' '}
+                <button type="button" className="text-neon hover:underline font-medium" onClick={(e) => { e.preventDefault(); setLegal('privacy'); }}>
+                  Privacy Policy
+                </button>
+              </span>
+            </label>
+          </div>
 
           <button
             type="submit"
-            disabled={loading || rateLimitCooldown > 0}
-            className="w-full exchange-btn exchange-btn-primary py-3.5 text-base disabled:opacity-60 flex items-center justify-center gap-2"
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-neon text-black text-sm font-bold tracking-wide hover:bg-[#4a9fff] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? <Loader2 className="animate-spin" size={22} /> : null}
-            {rateLimitCooldown > 0 ? t('auth_wait_seconds', { s: rateLimitCooldown }) : t('create_account')}
+            {loading ? <Loader2 className="animate-spin" size={18} /> : null}
+            {t('create_account')}
           </button>
 
-          <p className="text-center text-sm text-textMuted pt-2">
+          <p className="text-center text-sm text-textMuted">
             {t('auth_have_account')}{' '}
             <button type="button" className="text-neon font-semibold hover:underline" onClick={onGoLogin}>
               {t('login_btn')}
             </button>
           </p>
-          </form>
-        ) : (
-          <div className="space-y-4 pt-2">
-            <div className="exchange-card p-4">
-              <h2 className="text-lg font-bold text-textPrimary">{t('auth_confirm_email_title')}</h2>
-              <p className="text-sm text-textSecondary mt-2 leading-relaxed">
-                Мы отправили письмо на <span className="font-mono text-white">{email.trim().toLowerCase()}</span>.
-                Перейдите по ссылке <span className="font-semibold text-white">Confirm your mail</span> в письме — после этого вы автоматически попадёте в аккаунт на бирже.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                type="button"
-                disabled={loading}
-                onClick={async () => {
-                  // Проверяем, подтвердил ли email пользователь.
-                  setLoading(true);
-                  try {
-                    const res = await login(email, password);
-                    if (res.ok) {
-                      onSuccess();
-                    } else {
-                      toast.show(res.error || t('auth_confirm_email_first'), 'error');
-                    }
-                  } catch (err: unknown) {
-                    toast.show(err instanceof Error ? err.message : t('auth_error_login'), 'error');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="w-full exchange-btn exchange-btn-primary py-3.5 text-base disabled:opacity-60"
-              >
-                {t('auth_confirmed_email')}
-              </button>
-              <button
-                type="button"
-                disabled={resending}
-                onClick={async () => {
-                  if (!resendEmailConfirmation) return;
-                  setResending(true);
-                  const res = await resendEmailConfirmation(email);
-                  setResending(false);
-                  if (!res.ok) toast.show(res.error || t('error_generic'), 'error');
-                  else toast.show(t('auth_email_resent'), 'success');
-                }}
-                className="w-full py-3 rounded-2xl exchange-btn-secondary text-textPrimary font-semibold active:scale-[0.99] transition-all hover:bg-surface"
-              >
-                {resending ? t('auth_resending') : t('auth_resend_email')}
-              </button>
-            </div>
-          </div>
-        )}
+        </form>
       </AuthFullScreenLayout>
-
-      {showConfirmModal ? (
-        <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/60"
-            aria-label={t('auth_close')}
-            onClick={() => setShowConfirmModal(false)}
-          />
-          <div className="relative w-full sm:max-w-md mx-auto rounded-t-3xl sm:rounded-3xl border border-border bg-surface p-5 shadow-2xl">
-            <div className="text-lg font-bold text-textPrimary">Подтвердите аккаунт в Gmail</div>
-            <div className="mt-2 text-sm text-textSecondary leading-relaxed">
-              Откройте приложение Gmail и нажмите <span className="font-semibold text-white">Confirm your mail</span>.
-              После подтверждения вы автоматически войдёте в аккаунт на бирже.
-            </div>
-            <div className="mt-4 flex flex-col gap-2">
-              <a
-                href={'https://mail.google.com/'}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full exchange-btn exchange-btn-primary py-3 text-base text-center"
-              >
-                {t('auth_open_gmail')}
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowConfirmModal(false);
-                  toast.show('После подтверждения вы войдёте автоматически. Если нет — нажмите «Я подтвердил email».', 'success');
-                }}
-                className="w-full py-3 rounded-2xl exchange-btn-secondary text-textPrimary font-semibold active:scale-[0.99] transition-all hover:bg-surface"
-              >
-                Я подтвержу сейчас
-              </button>
-              <button
-                type="button"
-                disabled={resending}
-                onClick={async () => {
-                  if (!resendEmailConfirmation) return;
-                  setResending(true);
-                  const res = await resendEmailConfirmation(email);
-                  setResending(false);
-                  if (!res.ok) toast.show(res.error || t('error_generic'), 'error');
-                  else toast.show(t('auth_email_resent'), 'success');
-                }}
-                className="w-full py-3 rounded-2xl border border-border bg-transparent text-textSecondary font-semibold active:scale-[0.99] transition-all hover:bg-card/60 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {resending ? t('auth_resending') : t('auth_resend_email')}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
       <LegalDocModal doc={legal} onClose={() => setLegal(null)} />
     </>

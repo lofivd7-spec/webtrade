@@ -84,7 +84,7 @@ body {
   -webkit-touch-callout: none;
   overscroll-behavior: none;
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 /** Секции экранов: маленький caps-label для группировки блоков */

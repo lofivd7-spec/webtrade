@@ -9,17 +9,17 @@ const POPULAR_TICKERS = [
   'LINK', 'UNI', 'LTC', 'BCH', 'ATOM', 'ETC', 'XLM', 'NEAR', 'APT', 'ARB',
 ];
 
-function CoinChip({
-  asset,
-  formatPrice,
-  symbol,
-  onAssetClick,
-}: {
+const CoinChip: React.FC<{
   asset: Asset;
   formatPrice: (n: number) => string;
   symbol: string;
   onAssetClick: (a: Asset) => void;
-}) {
+}> = ({
+  asset,
+  formatPrice,
+  symbol,
+  onAssetClick,
+}) => {
   const isUp = (asset.change24h ?? 0) >= 0;
   return (
     <button

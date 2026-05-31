@@ -1,27 +1,20 @@
 import React from 'react';
-import { ArrowLeft, TrendingUp, BarChart2, Shield } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { ETORO_LOGO_URL } from '../constants';
 import { Haptic } from '../utils/haptics';
 
 interface AuthFullScreenLayoutProps {
   children: React.ReactNode;
   onBack: () => void;
-  /** Заголовок под шапкой (необязательно) */
   title?: string;
   subtitle?: string;
-  /** Если true — включить сплит-экран на desktop */
-  split?: boolean;
 }
 
-/**
- * Полноэкранный «лист» для входа/регистрации: как у бирж — без нижней навигации, с безопасными отступами.
- */
 const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
   children,
   onBack,
   title,
   subtitle,
-  split = true,
 }) => {
   return (
     <div
@@ -31,128 +24,91 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(900px_440px_at_7%_-15%,rgba(32,120,225,0.22),transparent_62%),radial-gradient(760px_360px_at_96%_-10%,rgba(18,168,255,0.16),transparent_65%)] pointer-events-none" />
-      <div className="absolute top-0 right-0 w-[min(100%,560px)] h-72 bg-neon/[0.09] blur-[130px] rounded-full translate-x-1/3 -translate-y-1/2 pointer-events-none" />
+      {/* Clean background glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+        <div className="absolute -top-[30%] right-[-20%] w-[600px] h-[600px] bg-neon/[0.06] blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] bg-[#1b8eff]/[0.04] blur-[100px] rounded-full" />
+      </div>
 
-      <div className={`h-full w-full ${split ? 'lg:grid lg:grid-cols-2' : 'flex flex-col'}`}>
-        {/* LEFT: Hero (desktop only) */}
-        {split && (
-          <aside className="hidden lg:flex relative overflow-hidden border-r border-border/60 bg-surface/90 backdrop-blur-xl">
-            {/* геометрический паттерн (очень низкая прозрачность) */}
-            <div className="absolute inset-0 pointer-events-none" aria-hidden>
-              <div className="absolute -top-24 -left-24 h-[420px] w-[420px] rounded-full bg-white/[0.025]" />
-              <div className="absolute top-[18%] right-[-120px] h-[340px] w-[340px] rotate-12 bg-white/[0.02] rounded-[48px]" />
-              <div className="absolute bottom-[-120px] left-[20%] h-[380px] w-[380px] rotate-[-8deg] bg-neon/[0.06] rounded-full blur-[2px]" />
+      <div className="h-full w-full lg:grid lg:grid-cols-2">
+        {/* LEFT: Hero (desktop only) — clean, minimal */}
+        <aside className="hidden lg:flex relative overflow-hidden bg-gradient-to-br from-[#060a12] via-[#080d1a] to-[#0a1020] border-r border-border/40">
+          <div className="absolute inset-0 pointer-events-none" aria-hidden>
+            <div className="absolute top-[10%] left-[15%] w-72 h-72 bg-neon/[0.05] blur-[100px] rounded-full" />
+            <div className="absolute bottom-[25%] right-[10%] w-48 h-48 bg-white/[0.03] blur-[80px] rounded-full" />
+          </div>
+
+          <div className="relative flex-1 flex flex-col justify-between p-12">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon/20 to-neon/5 ring-1 ring-white/10 flex items-center justify-center overflow-hidden">
+                <img src={ETORO_LOGO_URL} alt="" width={24} height={24} className="object-contain" />
+              </div>
+              <span className="text-lg font-bold tracking-tight text-ink">MEXC</span>
             </div>
 
-            <div className="relative flex-1 flex flex-col p-10">
-              <div className="flex items-center gap-3">
-                <img
-                  src={ETORO_LOGO_URL}
-                  alt=""
-                  width={40}
-                  height={40}
-                  decoding="async"
-                  className="h-10 w-10 rounded-2xl object-cover ring-1 ring-white/10"
-                />
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold tracking-tight text-textPrimary truncate">MEXC</div>
-                  <div className="text-[11px] text-textMuted truncate">Crypto exchange</div>
-                </div>
-              </div>
-
-              <div className="mt-12">
-                <h1 className="text-4xl font-bold tracking-tight text-ink leading-[1.05]">
-                  Профессиональный{' '}
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-neon via-neon/80 to-up">
-                    терминал криптобиржи
-                  </span>
-                </h1>
-                <p className="mt-4 text-sm text-textSecondary leading-relaxed max-w-md">
-                  Строгий продуктовый интерфейс: высокая читаемость, стабильная иерархия данных и понятные сценарии для реальной торговли.
-                </p>
-              </div>
-
-              <div className="mt-10 grid gap-4 max-w-md">
-                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.08] px-4 py-3">
-                  <TrendingUp size={18} className="text-neon shrink-0 mt-0.5" strokeWidth={2} />
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-textPrimary">Рыночные данные</div>
-                    <div className="text-[12px] text-textSecondary leading-snug">
-                      Лента рынков, стакан, спот и фьючерсы в едином паттерне.
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.08] px-4 py-3">
-                  <BarChart2 size={18} className="text-neon shrink-0 mt-0.5" strokeWidth={2} />
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-textPrimary">Аналитика</div>
-                    <div className="text-[12px] text-textSecondary leading-snug">
-                      Скоростной chart-flow и точная работа с позициями.
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-2xl bg-background/35 border border-white/[0.08] px-4 py-3">
-                  <Shield size={18} className="text-neon shrink-0 mt-0.5" strokeWidth={2} />
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-textPrimary">Надёжность</div>
-                    <div className="text-[12px] text-textSecondary leading-snug">
-                      Подтверждения операций, логирование и контроль безопасности.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto pt-10 text-[11px] text-textMuted">
-                © MEXC
-              </div>
+            <div className="space-y-2 -mt-16">
+              <h1 className="text-[2rem] font-bold tracking-tight text-ink leading-[1.1]">
+                Профессиональная
+                <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-neon to-[#5ba3ff]">
+                  криптобиржа
+                </span>
+              </h1>
+              <p className="text-sm text-textSecondary max-w-sm leading-relaxed">
+                Спот, фьючерсы, аналитика. Всё в одном терминале для реальной торговли.
+              </p>
             </div>
-          </aside>
-        )}
+
+            <div className="space-y-3">
+              {[
+                'Мгновенные депозиты и выводы',
+                'Рыночные данные в реальном времени',
+                'Защита средств и анонимность',
+              ].map((text) => (
+                <div key={text} className="flex items-center gap-3 text-sm text-textSecondary">
+                  <div className="w-1.5 h-1.5 rounded-full bg-neon shrink-0" />
+                  {text}
+                </div>
+              ))}
+            </div>
+
+            <div className="text-[11px] text-textMuted">&copy; MEXC {new Date().getFullYear()}</div>
+          </div>
+        </aside>
 
         {/* RIGHT: Form */}
-        <section className="relative flex flex-col h-full overflow-hidden">
-          {/* декоративные “треугольники” в углах */}
-          <div className="absolute -top-10 -right-10 h-40 w-40 rotate-12 bg-neon/[0.08] blur-[1px] clip-triangle pointer-events-none" />
-          <div className="absolute bottom-[-60px] left-[-60px] h-52 w-52 -rotate-6 bg-white/[0.03] blur-[1px] clip-triangle pointer-events-none" />
-
-          {/* Header (mobile + desktop) */}
-          <header className="relative shrink-0 flex items-center gap-3 px-4 py-3 hairline-bottom bg-background/72 backdrop-blur-xl">
+        <section className="relative flex flex-col h-full">
+          {/* Header */}
+          <header className="relative shrink-0 flex items-center gap-3 px-5 py-4">
             <button
               type="button"
               onClick={() => {
                 Haptic.light();
                 onBack();
               }}
-              className="touch-target flex items-center justify-center rounded-xl text-textMuted hover:text-textPrimary hover:bg-card min-h-[44px] min-w-[44px] -ml-1"
+              className="flex items-center justify-center w-10 h-10 rounded-xl text-textMuted hover:text-textPrimary hover:bg-card/60 transition-all -ml-2"
               aria-label="Назад"
             >
-              <ArrowLeft size={22} strokeWidth={2} />
+              <ArrowLeft size={20} strokeWidth={1.5} />
             </button>
 
-            {/* компактный логотип (особенно для mobile) */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <img
-                src={ETORO_LOGO_URL}
-                alt=""
-                width={32}
-                height={32}
-                decoding="async"
-                className="h-8 w-8 rounded-2xl object-cover ring-1 ring-white/10"
-              />
-              <span className="text-sm font-semibold tracking-tight truncate text-textPrimary">MEXC</span>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon/20 to-neon/5 ring-1 ring-white/10 flex items-center justify-center overflow-hidden">
+                <img src={ETORO_LOGO_URL} alt="" width={18} height={18} className="object-contain" />
+              </div>
+              <span className="text-sm font-semibold tracking-tight text-ink">MEXC</span>
             </div>
           </header>
 
           {(title || subtitle) && (
-            <div className="relative shrink-0 px-5 pt-6 pb-2">
-              {title ? <h1 className="text-2xl font-bold text-ink tracking-tight">{title}</h1> : null}
-              {subtitle ? <p className="text-sm text-textSecondary mt-1 leading-relaxed">{subtitle}</p> : null}
+            <div className="relative shrink-0 px-5 pt-4 pb-2">
+              {title ? <h1 className="text-xl font-bold text-ink tracking-tight">{title}</h1> : null}
+              {subtitle ? <p className="text-sm text-textSecondary mt-1">{subtitle}</p> : null}
             </div>
           )}
 
-          <div className="relative flex-1 min-h-0 overflow-y-auto no-scrollbar scroll-app px-5 pb-10 pt-2">
-            <div className="max-w-md mx-auto w-full">
+          <div className="relative flex-1 min-h-0 overflow-y-auto no-scrollbar scroll-app px-5 pb-10 pt-4">
+            <div className="max-w-sm mx-auto w-full">
               {children}
             </div>
           </div>

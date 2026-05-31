@@ -151,6 +151,10 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Если есть webUserId, но user ещё не загружен — считаем что загрузка идёт
+  const isUserPending = webUserId != null && user == null;
+  const effectiveLoading = loading || isUserPending;
+
   const getTgid = (): string | null => {
     const params = new URLSearchParams(window.location.search);
     const fromParams = params.get('tgid');
@@ -205,12 +209,16 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
   }, [tgid, webUserId, fetchUser, fetchUserByWebId]);
 
   useEffect(() => {
+    let alive = true;
     const id = getTgid();
     setTgid(id);
     setError(null);
+    setLoading(true);
 
-    (async () => {
+    const fetchData = async () => {
+      if (!alive) return;
       if (!isSupabaseConfigured) {
+        if (!alive) return;
         setUser(null);
         setSettings({ support_username: 'Support', min_deposit: DEFAULT_MIN_DEPOSIT_USD, min_withdraw: 50, bank_details: null });
         setCountries(FALLBACK_COUNTRIES);
@@ -230,6 +238,7 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
           supabase.from('crypto_wallets').select('id, network, wallet_address, label, is_active, sort_order').eq('is_active', true).order('sort_order'),
           supabase.from('withdraw_message_templates').select('message_type, title, description, icon, button_text').eq('is_active', true).order('sort_order'),
         ]);
+        if (!alive) return;
         if (userRes.data) setUser(userRes.data as DbUser);
         else setUser(null);
         if (settingsRes.data) setSettings(settingsRes.data as SettingsRow);
@@ -248,6 +257,7 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
           supabase.from('crypto_wallets').select('id, network, wallet_address, label, is_active, sort_order').eq('is_active', true).order('sort_order'),
           supabase.from('withdraw_message_templates').select('message_type, title, description, icon, button_text').eq('is_active', true).order('sort_order'),
         ]);
+        if (!alive) return;
         setUser(null);
         if (settingsRes.data) setSettings(settingsRes.data as SettingsRow);
         else setSettings({ support_username: 'Support', min_deposit: DEFAULT_MIN_DEPOSIT_USD, min_withdraw: 50, bank_details: null });
@@ -266,6 +276,7 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
         supabase.from('crypto_wallets').select('id, network, wallet_address, label, is_active, sort_order').eq('is_active', true).order('sort_order'),
         supabase.from('withdraw_message_templates').select('message_type, title, description, icon, button_text').eq('is_active', true).order('sort_order'),
       ]);
+      if (!alive) return;
 
       if (userRes.data) setUser(userRes.data as DbUser);
       else {
@@ -281,7 +292,12 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
       if (templatesRes.data) setWithdrawTemplates((templatesRes.data as WithdrawTemplate[]) || []);
 
       setLoading(false);
-    })();
+    };
+    fetchData();
+
+    return () => {
+      alive = false;
+    };
   }, [tgid, webUserId]);
 
   // Realtime: мгновенное обновление баланса и режима win/lose при изменении в БД
@@ -399,7 +415,7 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
     minDepositUsd,
     minWithdraw,
     supportLink,
-    loading,
+    loading: effectiveLoading,
     error,
     refreshUser,
   };

