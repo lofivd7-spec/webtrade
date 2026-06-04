@@ -18,9 +18,9 @@ import { Haptic } from '../utils/haptics';
 import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
 import { MARKET_ASSETS } from '../constants';
-import { fetchAssetPricesInRub } from '../lib/cryptoPrices';
+import { fetchAssetPricesInUsd } from '../lib/cryptoPrices';
 import { useLiveAssets } from '../utils/useLiveAssets';
-import { withNftDisplayWobbleRub } from '../utils/nftPriceWobble';
+import { withNftDisplayWobbleUsd } from '../utils/nftPriceWobble';
 import { enrichNftListingRow, useNftReferrerPriceMap } from '../lib/nftReferrerPricing';
 import { fetchActivityHistory } from '../lib/activityHistory';
 import {
@@ -59,7 +59,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
   const { t, locale } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabId>('ACTIVE');
   const [now, setNow] = useState(Date.now());
-  const [ethRubNft, setEthRubNft] = useState(0);
+  const [ethUsdNft, setEthRubNft] = useState(0);
   const refNftPriceMap = useNftReferrerPriceMap();
   const [activityHistory, setActivityHistory] = useState<ActivityHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -86,23 +86,23 @@ const DealsPage: React.FC<DealsPageProps> = ({
         if (!row) return null;
         const live = assetsByTicker[h.ticker];
         const rowPriced = enrichNftListingRow(row, refNftPriceMap);
-        const baseRub =
-          ethRubNft > 0
-            ? rowPriced.priceEth * ethRubNft
+        const baseUsd =
+          ethUsdNft > 0
+            ? rowPriced.priceEth * ethUsdNft
             : Math.max(h.avgPriceRub ?? 0, rowPriced.priceEth * 320_000, live?.price ?? 0, 1);
-        const priceRub =
-          Number.isFinite(baseRub) && baseRub > 0
-            ? withNftDisplayWobbleRub(baseRub, h.ticker, now)
+        const priceUsd =
+          Number.isFinite(baseUsd) && baseUsd > 0
+            ? withNftDisplayWobbleUsd(baseUsd, h.ticker, now)
             : Math.max(h.avgPriceRub ?? 0, 1);
-        const asset = nftListingToAsset(rowPriced, Math.max(priceRub, 1));
-        const valueRub = (h.amount ?? 0) * (priceRub > 0 ? priceRub : h.avgPriceRub ?? 0);
-        return { holding: h, asset, row, price: priceRub || h.avgPriceRub, valueRub };
+        const asset = nftListingToAsset(rowPriced, Math.max(priceUsd, 1));
+        const valueUsd = (h.amount ?? 0) * (priceUsd > 0 ? priceUsd : h.avgPriceRub ?? 0);
+        return { holding: h, asset, row, price: priceUsd || h.avgPriceRub, valueUsd };
       })
       .filter((r): r is NonNullable<typeof r> => r != null)
-      .filter((r) => Number.isFinite(r.valueRub));
-    rows.sort((a, b) => b.valueRub - a.valueRub);
+      .filter((r) => Number.isFinite(r.valueUsd));
+    rows.sort((a, b) => b.valueUsd - a.valueUsd);
     return rows;
-  }, [spotHoldings, assetsByTicker, nftListingBySpotTicker, now, ethRubNft, refNftPriceMap]);
+  }, [spotHoldings, assetsByTicker, nftListingBySpotTicker, now, ethUsdNft, refNftPriceMap]);
 
   const spotRows = useMemo(() => {
     const rows = spotHoldings
@@ -110,7 +110,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
       .map((h) => {
         const live = assetsByTicker[h.ticker];
         const price = live?.price ?? h.avgPriceRub ?? 0;
-        const valueRub = (h.amount ?? 0) * price;
+        const valueUsd = (h.amount ?? 0) * price;
         const asset: Asset =
           live ??
           (MARKET_ASSETS.find((a) => a.ticker === h.ticker) ||
@@ -122,10 +122,10 @@ const DealsPage: React.FC<DealsPageProps> = ({
               volume24h: 0,
               change24h: 0,
             } as Asset));
-        return { holding: h, asset, price, valueRub };
+        return { holding: h, asset, price, valueUsd };
       })
-      .filter((r) => Number.isFinite(r.valueRub));
-    rows.sort((a, b) => b.valueRub - a.valueRub);
+      .filter((r) => Number.isFinite(r.valueUsd));
+    rows.sort((a, b) => b.valueUsd - a.valueUsd);
     return rows;
   }, [spotHoldings, assetsByTicker, nftListingBySpotTicker]);
 
@@ -138,7 +138,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
     let cancelled = false;
     const pull = async () => {
       try {
-        const p = await fetchAssetPricesInRub(['ETH']);
+        const p = await fetchAssetPricesInUsd(['ETH']);
         if (cancelled) return;
         const x = p.ETH?.price ?? 0;
         if (Number.isFinite(x) && x > 0 && !p.ETH?.unavailable) setEthRubNft(x);
@@ -167,7 +167,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
   const totalActiveExposure = activeDeals.reduce((sum, d) => sum + d.amount, 0);
   const totalPnlActive = activeDeals.reduce((sum, d) => sum + (d.pnl ?? 0), 0);
 
-  const stakingValueRub = useMemo(() => {
+  const stakingValueUsd = useMemo(() => {
     if (!stakingPositions?.length) return 0;
     return stakingPositions.reduce((sum, p) => {
       const price = assetsByTicker[p.ticker]?.price ?? 0;
@@ -175,23 +175,23 @@ const DealsPage: React.FC<DealsPageProps> = ({
     }, 0);
   }, [stakingPositions, assetsByTicker]);
 
-  const spotValueRub = useMemo(
+  const spotValueUsd = useMemo(
     () =>
-      spotRows.reduce((s, r) => s + (r.valueRub ?? 0), 0) +
-      nftPortfolioRows.reduce((s, r) => s + (r.valueRub ?? 0), 0),
+      spotRows.reduce((s, r) => s + (r.valueUsd ?? 0), 0) +
+      nftPortfolioRows.reduce((s, r) => s + (r.valueUsd ?? 0), 0),
     [spotRows, nftPortfolioRows]
   );
-  const totalPortfolioRub = useMemo(() => balance + spotValueRub + stakingValueRub, [balance, spotValueRub, stakingValueRub]);
+  const totalPortfolioUsd = useMemo(() => balance + spotValueUsd + stakingValueUsd, [balance, spotValueUsd, stakingValueUsd]);
 
-  const dayChangeRub = useMemo(() => {
+  const dayChangeUsd = useMemo(() => {
     const spotCrypto = spotRows.reduce(
       (s, r) =>
-        s + (r.valueRub ?? 0) * (((assetsByTicker[r.holding.ticker]?.change24h ?? 0) as number) / 100),
+        s + (r.valueUsd ?? 0) * (((assetsByTicker[r.holding.ticker]?.change24h ?? 0) as number) / 100),
       0
     );
     const nftDay = nftPortfolioRows.reduce((s, r) => {
       const chTicker = assetsByTicker[r.holding.ticker]?.change24h ?? assetsByTicker.ETH?.change24h ?? 0;
-      return s + (r.valueRub ?? 0) * ((chTicker as number) / 100);
+      return s + (r.valueUsd ?? 0) * ((chTicker as number) / 100);
     }, 0);
     const staking = (stakingPositions ?? []).reduce((s, p) => {
       const price = assetsByTicker[p.ticker]?.price ?? 0;
@@ -202,14 +202,14 @@ const DealsPage: React.FC<DealsPageProps> = ({
     return spotCrypto + nftDay + staking;
   }, [spotRows, nftPortfolioRows, assetsByTicker, stakingPositions]);
 
-  const dayChangePct = useMemo(() => (totalPortfolioRub > 0 ? (dayChangeRub / totalPortfolioRub) * 100 : 0), [dayChangeRub, totalPortfolioRub]);
+  const dayChangePct = useMemo(() => (totalPortfolioUsd > 0 ? (dayChangeUsd / totalPortfolioUsd) * 100 : 0), [dayChangeUsd, totalPortfolioUsd]);
 
-  const nftHoldingsValueRub = useMemo(
-    () => nftPortfolioRows.reduce((s, r) => s + (r.valueRub ?? 0), 0),
+  const nftHoldingsValueUsd = useMemo(
+    () => nftPortfolioRows.reduce((s, r) => s + (r.valueUsd ?? 0), 0),
     [nftPortfolioRows]
   );
-  const spotHoldingsValueRubOnly = useMemo(
-    () => spotRows.reduce((s, r) => s + (r.valueRub ?? 0), 0),
+  const spotHoldingsValueUsdOnly = useMemo(
+    () => spotRows.reduce((s, r) => s + (r.valueUsd ?? 0), 0),
     [spotRows]
   );
 
@@ -263,20 +263,20 @@ const DealsPage: React.FC<DealsPageProps> = ({
                 <Skeleton className="w-40 h-9 rounded-xl bg-card/60" />
               ) : (
                 <span className="text-[34px] font-semibold tracking-tight text-white tabular-nums leading-[1] truncate">
-                  {formatPrice(totalPortfolioRub, { fractionDigits: 2 })}
+                  {formatPrice(totalPortfolioUsd, { fractionDigits: 2 })}
                 </span>
               )}
               <span className="text-xs text-white/70 font-medium leading-none">{currencyCode}</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
-              {dayChangeRub !== 0 && (
+              {dayChangeUsd !== 0 && (
                 <span
                   className={`text-[11px] font-mono px-2 py-1 rounded-full ${
-                    dayChangeRub > 0 ? 'text-up bg-emerald-500/10' : 'text-down bg-red-500/10'
+                    dayChangeUsd > 0 ? 'text-up bg-emerald-500/10' : 'text-down bg-red-500/10'
                   }`}
                 >
-                  {dayChangeRub > 0 ? '+' : ''}
-                  {formatPrice(dayChangeRub)} {symbol} ({dayChangePct > 0 ? '+' : ''}
+                  {dayChangeUsd > 0 ? '+' : ''}
+                  {formatPrice(dayChangeUsd)} {symbol} ({dayChangePct > 0 ? '+' : ''}
                   {dayChangePct.toFixed(2)}%)
                 </span>
               )}
@@ -487,13 +487,13 @@ const DealsPage: React.FC<DealsPageProps> = ({
                     item.activity_type === 'spot_buy' ||
                     item.activity_type === 'stake' ||
                     item.activity_type === 'staking_reward' ||
-                    (item.activity_type === 'trade' && (item.amount_rub ?? 0) >= 0);
+                    (item.activity_type === 'trade' && (item.amount_usd ?? 0) >= 0);
                   const isRed =
                     item.activity_type === 'spot_sell' ||
                     item.activity_type === 'unstake' ||
-                    (item.activity_type === 'trade' && (item.amount_rub ?? 0) < 0);
+                    (item.activity_type === 'trade' && (item.amount_usd ?? 0) < 0);
                   const ticker = item.ticker || (item.payload?.symbol as string) || '—';
-                  const amountRub = item.amount_rub ?? 0;
+                  const amountUsd = item.amount_usd ?? 0;
                   const quantity = item.quantity ?? 0;
                   const payload = item.payload as { type?: string; leverage?: number } | undefined;
                   return (
@@ -518,19 +518,19 @@ const DealsPage: React.FC<DealsPageProps> = ({
                       </div>
                       <div className="text-right shrink-0">
                         {item.activity_type === 'trade' && (
-                          <span className={`font-mono text-sm font-bold tabular-nums ${amountRub >= 0 ? 'text-up' : 'text-down'}`}>
-                            {amountRub >= 0 ? '+' : ''}
-                            {formatPrice(amountRub)} {symbol}
+                          <span className={`font-mono text-sm font-bold tabular-nums ${amountUsd >= 0 ? 'text-up' : 'text-down'}`}>
+                            {amountUsd >= 0 ? '+' : ''}
+                            {formatPrice(amountUsd)} {symbol}
                           </span>
                         )}
                         {(item.activity_type === 'spot_buy' || item.activity_type === 'spot_sell') && (
-                          <span className="font-mono text-sm text-textPrimary">{formatPrice(amountRub)} {symbol}</span>
+                          <span className="font-mono text-sm text-textPrimary">{formatPrice(amountUsd)} {symbol}</span>
                         )}
                         {item.activity_type === 'stake' && (
-                          <span className="font-mono text-sm text-neon">−{formatPrice(amountRub)} {symbol}</span>
+                          <span className="font-mono text-sm text-neon">−{formatPrice(amountUsd)} {symbol}</span>
                         )}
                         {(item.activity_type === 'unstake' || item.activity_type === 'staking_reward') && (
-                          <span className="font-mono text-sm text-up">+{formatPrice(amountRub)} {symbol}</span>
+                          <span className="font-mono text-sm text-up">+{formatPrice(amountUsd)} {symbol}</span>
                         )}
                       </div>
                     </div>
@@ -571,7 +571,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                           {t('portfolio_split_nft_value')}
                         </p>
                         <p className="text-[18px] font-bold font-mono text-neon tabular-nums leading-tight mt-1 truncate">
-                          {formatPrice(nftHoldingsValueRub)} {symbol}
+                          {formatPrice(nftHoldingsValueUsd)} {symbol}
                         </p>
                         <p className="text-[10px] text-textMuted mt-1.5">
                           {nftPortfolioRows.length} {t('nft_items')}
@@ -584,7 +584,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                           {t('portfolio_split_spot_value')}
                         </p>
                         <p className="text-[18px] font-bold font-mono text-textPrimary tabular-nums leading-tight mt-1 truncate">
-                          {formatPrice(spotHoldingsValueRubOnly)} {symbol}
+                          {formatPrice(spotHoldingsValueUsdOnly)} {symbol}
                         </p>
                         <p className="text-[10px] text-textMuted mt-1.5">
                           {spotRows.length}{' '}
@@ -622,7 +622,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                     </div>
                   ) : (
                     <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 snap-x snap-mandatory scroll-pl-4 -mx-4 pl-4 pr-4 scroll-smooth">
-                      {nftPortfolioRows.map(({ holding, asset, row, price, valueRub }) => {
+                      {nftPortfolioRows.map(({ holding, asset, row, price, valueUsd }) => {
                         const qtyRounded = Math.round((holding.amount ?? 0) * 1000) / 1000;
                         const qtyLabel =
                           Math.abs(qtyRounded - Math.floor(qtyRounded + 1e-9)) < 1e-6
@@ -664,7 +664,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                               <div className="flex items-end justify-between gap-2">
                                 <div className="min-w-0">
                                   <p className="text-[15px] font-mono font-bold text-textPrimary tabular-nums truncate">
-                                    {formatPrice(valueRub)} {symbol}
+                                    {formatPrice(valueUsd)} {symbol}
                                   </p>
                                   <p className="text-[10px] text-textMuted font-mono tabular-nums mt-0.5">
                                     ~ {price > 0 ? formatPrice(price) : '—'} {symbol}/{t('portfolio_units_label')}
@@ -703,7 +703,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                     </div>
                   ) : (
                     <div className="rounded-2xl overflow-hidden bg-card border border-border divide-y divide-border">
-                      {spotRows.map(({ holding, asset, price, valueRub }) => {
+                      {spotRows.map(({ holding, asset, price, valueUsd }) => {
                         const initials = holding.ticker.slice(0, 3).toUpperCase();
                         return (
                           <button
@@ -734,7 +734,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                             <div className="text-right shrink-0 flex items-center gap-2">
                               <div>
                                 <p className="font-mono text-[14px] font-bold text-textPrimary tabular-nums">
-                                  {formatPrice(valueRub)} {symbol}
+                                  {formatPrice(valueUsd)} {symbol}
                                 </p>
                                 <p className="text-[10px] text-textMuted font-mono tabular-nums">{currencyCode}</p>
                               </div>

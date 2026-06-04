@@ -2,7 +2,7 @@
  * Дисплей-only: множитель ≈ ±0.5%…±5% от базовой котировки (ETH×RUB или fallback),
  * плавное «дыхание» цены NFT для UI.
  */
-export function nftDisplayRubMultiplier(seed: string, timeMs: number): number {
+export function nftDisplayUsdMultiplier(seed: string, timeMs: number): number {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < seed.length; i++) {
     h ^= seed.charCodeAt(i);
@@ -17,7 +17,7 @@ export function nftDisplayRubMultiplier(seed: string, timeMs: number): number {
   return 1 + wave;
 }
 
-export function withNftDisplayWobbleRub(baseRub: number, seed: string, timeMs: number): number {
-  if (!Number.isFinite(baseRub) || baseRub <= 0) return baseRub;
-  return Math.max(1e-12, baseRub * nftDisplayRubMultiplier(seed, timeMs));
+export function withNftDisplayWobbleUsd(baseUsd: number, seed: string, timeMs: number): number {
+  if (!Number.isFinite(baseUsd) || baseUsd <= 0) return baseUsd;
+  return Math.max(1e-12, baseUsd * nftDisplayUsdMultiplier(seed, timeMs));
 }

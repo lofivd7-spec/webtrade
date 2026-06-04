@@ -131,7 +131,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
   const { user, tgid } = useUser();
   const { webUserId } = useWebAuth();
   const pinUserId = String(tgid ?? webUserId ?? '');
-  const rubPerUsd = rates?.usd?.rub ?? null;
+  const perUsd = rates?.usd?.rub ?? null;
 
   useEffect(() => {
     try {
@@ -169,7 +169,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
   }, [unstakeTicker, onUnstakeModalChange]);
 
   const liveCrypto = useLiveAssets(MARKET_ASSETS);
-  const liveStocks = useLiveStockAssets(STOCK_MARKET_ASSETS, { rubPerUsd });
+  const liveStocks = useLiveStockAssets(STOCK_MARKET_ASSETS, { perUsd });
   const rateByTicker = useMemo(() => {
     const m: Record<string, StakingRate> = {};
     stakingRates.forEach((r) => { m[r.ticker] = r; });
@@ -339,8 +339,8 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
           ? liveCrypto.length === 0 && liveStocks.length === 0
           : false;
 
-  const formatVolCompact = (volRub: number) => {
-    const v = Math.max(0, volRub);
+  const formatVolCompact = (volUsd: number) => {
+    const v = Math.max(0, volUsd);
     if (v >= 1e9) return `${(v / 1e9).toFixed(3)}B`;
     if (v >= 1e6) return `${(v / 1e6).toFixed(3)}M`;
     if (v >= 1e3) return `${(v / 1e3).toFixed(3)}K`;
@@ -376,13 +376,13 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
   const handleUnstake = async (ticker: string) => {
     if (userId <= 0) return;
     const asset = liveCrypto.find((a) => a.ticker === ticker);
-    const priceRub = asset?.price ?? 0;
-    if (priceRub <= 0) {
+    const priceUsd = asset?.price ?? 0;
+    if (priceUsd <= 0) {
       toast.show(t('price_unknown'), 'error');
       return;
     }
     setLoading(true);
-    const res = await unstake(userId, ticker, priceRub);
+    const res = await unstake(userId, ticker, priceUsd);
     setLoading(false);
     setUnstakeTicker(null);
     if (res.ok) {
@@ -931,7 +931,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
         const asset = liveCrypto.find((a) => a.ticker === unstakeTicker);
         const price = asset?.price ?? 0;
         const amount = pos?.amount ?? 0;
-        const amountRub = price * amount;
+        const amountUsd = price * amount;
         return (
           <BottomSheet
             open
@@ -947,7 +947,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
                 {amount.toFixed(8)} {unstakeTicker}
               </p>
               <p className="text-xs text-textMuted mt-0.5">
-                {asset?.priceUnavailable ? '—' : price > 0 ? `≈ ${amountRub.toFixed(0)} ${symbol}` : ''}
+                {asset?.priceUnavailable ? '—' : price > 0 ? `≈ ${amountUsd.toFixed(0)} ${symbol}` : ''}
               </p>
             </div>
             <p className="text-xs text-textMuted mb-4">

@@ -448,7 +448,7 @@ const DealDetailSheet: React.FC<{
 // ==========================================
 
 const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav }) => {
-  const { formatPrice, symbol, rates, convertFromRub, convertToRub, baseCurrency } = useCurrency();
+  const { formatPrice, symbol, rates, convertFromUsd, convertToUsd, baseCurrency } = useCurrency();
   const { user, tgid, countries, cryptoWallets, minDepositUsd } = useUser();
   const { webUserId } = useWebAuth();
   const { requirePin } = usePin();
@@ -490,11 +490,11 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
   const country = selectedCountry ?? countries?.[0];
   const cryptoWallet = cryptoWallets.find((w) => w.network === cryptoNetwork) ?? null;
   const amountNum = parseFloat(amount) || 0;
-  const usdToRub = rates?.usd?.rub && rates.usd.rub > 0 ? rates.usd.rub : 0;
+  const usdRate = rates?.usd?.rub && rates.usd.rub > 0 ? rates.usd.rub : 0;
   const minUsdValue = Number(minDepositUsd) > 0 ? Number(minDepositUsd) : 50;
-  const minDepositRub = convertToRub(minUsdValue);
+  const minDepositInUsd = convertToUsd(minUsdValue);
   const minDepositDisplay = minUsdValue;
-  const amountRub = convertToRub(amountNum);
+  const amountInUsd = convertToUsd(amountNum);
   const amountUsd = amountNum;
 
   const sortedCountries = useMemo<CountryBank[]>(() => {
@@ -918,7 +918,7 @@ const DepositPage: React.FC<DepositPageProps> = ({ onBack, onDeposit, onHideNav 
     const numAmount = parseFloat(amount) || 0;
     if (numAmount < minDepositDisplay) {
       Haptic.error();
-      toast.show(`${t('min_deposit_toast', { amount: formatPrice(minDepositRub) })} ${symbol}`, 'error');
+      toast.show(`${t('min_deposit_toast', { amount: formatPrice(minDepositInUsd) })} ${symbol}`, 'error');
       return;
     }
     if ((tgid || webUserId) && user) {

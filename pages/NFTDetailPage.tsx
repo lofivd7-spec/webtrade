@@ -2,10 +2,10 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { fetchAssetPricesInRub } from '../lib/cryptoPrices';
+import { fetchAssetPricesInUsd } from '../lib/cryptoPrices';
 import { getNftListingsForCollection, nftListingToAsset, nftTickerForListing, type NftListingRow } from '../lib/nftCatalog';
 import { enrichNftListingRow, useNftReferrerPriceMap } from '../lib/nftReferrerPricing';
-import { withNftDisplayWobbleRub } from '../utils/nftPriceWobble';
+import { withNftDisplayWobbleUsd } from '../utils/nftPriceWobble';
 import type { Asset } from '../types';
 import { Haptic } from '../utils/haptics';
 import {
@@ -23,15 +23,15 @@ interface NFTDetailPageProps {
 
 type BookRow = { price: number; size: number };
 
-function buildOrderBook(midRub: number): { asks: BookRow[]; bids: BookRow[] } {
-  if (!Number.isFinite(midRub) || midRub <= 0) return { asks: [], bids: [] };
+function buildOrderBook(midUsd: number): { asks: BookRow[]; bids: BookRow[] } {
+  if (!Number.isFinite(midUsd) || midUsd <= 0) return { asks: [], bids: [] };
   const rel = 0.00045;
   const asks: BookRow[] = Array.from({ length: 7 }, (_, i) => ({
-    price: midRub * (1 + rel * (i + 1)),
+    price: midUsd * (1 + rel * (i + 1)),
     size: parseFloat((0.018 + ((i * 7 + 11) % 10) * 0.006).toFixed(3)),
   })).reverse();
   const bids: BookRow[] = Array.from({ length: 7 }, (_, i) => ({
-    price: midRub * (1 - rel * (i + 1)),
+    price: midUsd * (1 - rel * (i + 1)),
     size: parseFloat((0.022 + ((i * 5 + 13) % 10) * 0.005).toFixed(3)),
   }));
   return { asks, bids };
@@ -54,7 +54,7 @@ const NFTDetailPage: React.FC<NFTDetailPageProps> = ({ listing, onBack, onTrade 
   );
   const index = siblings.findIndex((s) => s.codeKey === display.codeKey);
 
-  const [ethRubSpot, setEthRubSpot] = useState(0);
+  const [ethUsdSpot, setEthRubSpot] = useState(0);
   /** Перерисовка «живого» дрейфа цены NFT на карточке */
   const [wobblePulse, setWobblePulse] = useState(0);
 
@@ -62,10 +62,10 @@ const NFTDetailPage: React.FC<NFTDetailPageProps> = ({ listing, onBack, onTrade 
     let cancelled = false;
     (async () => {
       try {
-        const prices = await fetchAssetPricesInRub(['ETH']);
-        const ethRub = prices.ETH?.price ?? 0;
+        const prices = await fetchAssetPricesInUsd(['ETH']);
+        const ethUsd = prices.ETH?.price ?? 0;
         if (cancelled) return;
-        setEthRubSpot(ethRub > 0 ? ethRub : 0);
+        setEthRubSpot(ethUsd > 0 ? ethUsd : 0);
       } catch {
         if (!cancelled) setEthRubSpot(0);
       }
@@ -81,19 +81,19 @@ const NFTDetailPage: React.FC<NFTDetailPageProps> = ({ listing, onBack, onTrade 
   }, []);
 
   const nftSpotTicker = useMemo(() => nftTickerForListing(pricedRow), [pricedRow.collectionSlug, pricedRow.codeKey]);
-  const baselineRub =
-    ethRubSpot > 0 ? pricedRow.priceEth * ethRubSpot : Math.max(pricedRow.priceEth * 320_000, 1);
-  const priceRub = useMemo(() => {
+  const baselineUsd =
+    ethUsdSpot > 0 ? pricedRow.priceEth * ethUsdSpot : Math.max(pricedRow.priceEth * 320_000, 1);
+  const priceUsd = useMemo(() => {
     void wobblePulse;
-    return withNftDisplayWobbleRub(Math.max(baselineRub, 1), nftSpotTicker, Date.now());
-  }, [baselineRub, nftSpotTicker, wobblePulse]);
+    return withNftDisplayWobbleUsd(Math.max(baselineUsd, 1), nftSpotTicker, Date.now());
+  }, [baselineUsd, nftSpotTicker, wobblePulse]);
 
-  const midRub = priceRub;
-  const [book, setBook] = useState(() => buildOrderBook(midRub));
+  const midUsd = priceUsd;
+  const [book, setBook] = useState(() => buildOrderBook(midUsd));
 
   const refreshBook = useCallback(() => {
-    setBook(buildOrderBook(midRub));
-  }, [midRub]);
+    setBook(buildOrderBook(midUsd));
+  }, [midUsd]);
 
   useEffect(() => {
     refreshBook();
@@ -108,7 +108,7 @@ const NFTDetailPage: React.FC<NFTDetailPageProps> = ({ listing, onBack, onTrade 
     setDisplay(siblings[nextIdx]!);
   };
 
-  const assetReady = nftListingToAsset(pricedRow, Math.max(priceRub, midRub, 1));
+  const assetReady = nftListingToAsset(pricedRow, Math.max(priceUsd, midUsd, 1));
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background animate-fade-in relative overflow-x-hidden">
@@ -165,7 +165,7 @@ const NFTDetailPage: React.FC<NFTDetailPageProps> = ({ listing, onBack, onTrade 
               </div>
               <div className="text-right min-w-0 shrink">
                 <div className="text-[10px] text-textMuted uppercase tracking-wider font-semibold">{t('markets_table_last_price')}</div>
-                <div className="text-sm font-mono font-bold text-neon truncate">{priceRub > 0 ? formatPrice(priceRub) : '—'}</div>
+                <div className="text-sm font-mono font-bold text-neon truncate">{priceUsd > 0 ? formatPrice(priceUsd) : '—'}</div>
               </div>
             </div>
             <button
@@ -199,7 +199,7 @@ const NFTDetailPage: React.FC<NFTDetailPageProps> = ({ listing, onBack, onTrade 
               ))}
             </div>
             <div className="py-2 flex flex-col items-center bg-black/20">
-              <span className="text-sm font-mono font-bold text-textPrimary">{formatPrice(midRub)}</span>
+              <span className="text-sm font-mono font-bold text-textPrimary">{formatPrice(midUsd)}</span>
               <span className="text-[8px] text-textMuted uppercase">{currencyCode}</span>
             </div>
             <div className="flex flex-col max-h-[140px] overflow-hidden py-0.5">

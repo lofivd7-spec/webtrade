@@ -6,7 +6,7 @@ function normalizeItem(row: {
   activity_type?: string;
   ticker?: string | null;
   quantity?: number | null;
-  amount_rub?: number | null;
+  amount_usd?: number | null;
   payload?: Record<string, unknown> | null;
   created_at?: string;
 }): ActivityHistoryItem {
@@ -15,7 +15,7 @@ function normalizeItem(row: {
     activity_type: (row.activity_type as ActivityHistoryItem['activity_type']) ?? 'trade',
     ticker: row.ticker ?? null,
     quantity: row.quantity != null ? Number(row.quantity) : null,
-    amount_rub: row.amount_rub != null ? Number(row.amount_rub) : null,
+    amount_usd: row.amount_usd != null ? Number(row.amount_usd) : null,
     payload: row.payload && typeof row.payload === 'object' ? row.payload as Record<string, unknown> : null,
     created_at: String(row.created_at ?? ''),
   };

@@ -31,7 +31,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
   onGoTrading,
 }) => {
   const { t } = useLanguage();
-  const { formatPrice, symbol, convertToRub, convertFromRub, currencyCode } = useCurrency();
+  const { formatPrice, symbol, convertToUsd, convertFromUsd, currencyCode } = useCurrency();
   const { user, refreshUser } = useUser();
   const toast = useToast();
   const liveAssets = useLiveAssets(MARKET_ASSETS);
@@ -51,7 +51,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
     onPickerOpenChange?.(false);
   };
 
-  const balanceRub = user?.balance ?? 0;
+  const balanceUsd = user?.balance ?? 0;
   const assetFrom =
     fromSide === 'currency'
       ? null
@@ -60,8 +60,8 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
     toSide === 'currency'
       ? null
       : liveAssets.find((a) => a.ticker === toSide) ?? MARKET_ASSETS.find((a) => a.ticker === toSide);
-  const priceFromRub = fromSide === 'currency' ? 0 : (assetFrom?.price ?? 0);
-  const priceToRub = toSide === 'currency' ? 0 : (assetTo?.price ?? 0);
+  const priceFromUsd = fromSide === 'currency' ? 0 : (assetFrom?.price ?? 0);
+  const priceToUsd = toSide === 'currency' ? 0 : (assetTo?.price ?? 0);
   const holdingFrom = fromSide === 'currency' ? null : spotHoldings.find((h) => h.ticker === fromSide);
   const fromAmount = fromSide === 'currency' ? 0 : (holdingFrom?.amount ?? 0);
 
@@ -71,36 +71,36 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
   const isFromCurrency = fromSide === 'currency';
   const isToCurrency = toSide === 'currency';
 
-  const amountInRub = isFromCurrency ? convertToRub(numAmount) : numAmount * priceFromRub;
+  const amountInUsd = isFromCurrency ? convertToUsd(numAmount) : numAmount * priceFromUsd;
   const resultQuantity =
-    isToCurrency ? (priceToRub > 0 ? amountInRub / priceToRub : 0) : priceToRub > 0 ? amountInRub / priceToRub : 0;
-  const resultInCurrency = amountInRub;
+    isToCurrency ? (priceToUsd > 0 ? amountInUsd / priceToUsd : 0) : priceToUsd > 0 ? amountInUsd / priceToUsd : 0;
+  const resultInCurrency = amountInUsd;
   const resultInCrypto = resultQuantity;
 
   const canSubmit =
     fromSide !== toSide &&
     numAmount > 0 &&
-    Number.isFinite(amountInRub) &&
-    amountInRub >= convertToRub(MIN_EXCHANGE_USD) &&
+    Number.isFinite(amountInUsd) &&
+    amountInUsd >= convertToUsd(MIN_EXCHANGE_USD) &&
     (isFromCurrency
-      ? balanceRub >= convertToRub(numAmount) && (isToCurrency || priceToRub > 0)
-      : fromAmount >= numAmount && priceFromRub > 0 && (isToCurrency || priceToRub > 0));
+      ? balanceUsd >= convertToUsd(numAmount) && (isToCurrency || priceToUsd > 0)
+      : fromAmount >= numAmount && priceFromUsd > 0 && (isToCurrency || priceToUsd > 0));
 
   const canSubmitForUi =
     user
       ? canSubmit
       : fromSide !== toSide &&
         numAmount > 0 &&
-        Number.isFinite(amountInRub) &&
-        amountInRub >= convertToRub(MIN_EXCHANGE_USD);
+        Number.isFinite(amountInUsd) &&
+        amountInUsd >= convertToUsd(MIN_EXCHANGE_USD);
 
   const amountPresetsRub = useMemo(
     () =>
-      [...new Set([convertToRub(MIN_EXCHANGE_USD), 1000, 5000, Math.floor(balanceRub * 0.5), balanceRub])]
-        .filter((v) => v >= convertToRub(MIN_EXCHANGE_USD) && v > 0)
+      [...new Set([convertToUsd(MIN_EXCHANGE_USD), 1000, 5000, Math.floor(balanceUsd * 0.5), balanceUsd])]
+        .filter((v) => v >= convertToUsd(MIN_EXCHANGE_USD) && v > 0)
         .sort((a, b) => a - b)
         .slice(0, 4),
-    [balanceRub]
+    [balanceUsd]
   );
 
   const sanitizeDecimalInput = (raw: string) => {
@@ -124,13 +124,13 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
     setLoading(true);
     try {
       if (isFromCurrency && !isToCurrency) {
-        const amountRub = convertToRub(numAmount);
-        if (amountRub <= 0 || amountRub > balanceRub) {
+        const amountUsd = convertToUsd(numAmount);
+        if (amountUsd <= 0 || amountUsd > balanceUsd) {
           toast.show(t('exchange_insufficient_balance'), 'error');
           setLoading(false);
           return;
         }
-        const res = await spotBuy(user.user_id, toSide as string, amountRub, priceToRub);
+        const res = await spotBuy(user.user_id, toSide as string, amountUsd, priceToUsd);
         if (res.ok) {
           toast.show(t('exchange_success'), 'success');
           setAmount('');
@@ -146,7 +146,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
           setLoading(false);
           return;
         }
-        const res = await spotSell(user.user_id, fromSide as string, numAmount, priceFromRub);
+        const res = await spotSell(user.user_id, fromSide as string, numAmount, priceFromUsd);
         if (res.ok) {
           toast.show(t('exchange_success'), 'success');
           setAmount('');
@@ -162,14 +162,14 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
           setLoading(false);
           return;
         }
-        const sellRes = await spotSell(user.user_id, fromSide as string, numAmount, priceFromRub);
-        if (!sellRes.ok || sellRes.amount_rub == null) {
+        const sellRes = await spotSell(user.user_id, fromSide as string, numAmount, priceFromUsd);
+        if (!sellRes.ok || sellRes.amount_usd == null) {
           toast.show(sellRes.error ?? t('exchange_insufficient_balance'), 'error');
           Haptic.error();
           setLoading(false);
           return;
         }
-        const buyRes = await spotBuy(user.user_id, toSide as string, sellRes.amount_rub, priceToRub);
+        const buyRes = await spotBuy(user.user_id, toSide as string, sellRes.amount_usd, priceToUsd);
         if (buyRes.ok) {
           toast.show(t('exchange_success'), 'success');
           setAmount('');
@@ -188,7 +188,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
   const fromLabel = isFromCurrency ? symbol : fromSide;
   const toLabel = isToCurrency ? symbol : toSide;
   const fromSub = isFromCurrency
-    ? `${formatPrice(balanceRub)} ${symbol}`
+    ? `${formatPrice(balanceUsd)} ${symbol}`
     : holdingFrom
       ? `${fromAmount.toFixed(6)} ${fromSide}`
       : null;
@@ -290,7 +290,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
                 {isFromCurrency && amountPresetsRub.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2">
                     {amountPresetsRub.map((presetRub) => {
-                      const presetDisplay = convertFromRub(presetRub);
+                      const presetDisplay = convertFromUsd(presetRub);
                       return (
                         <button
                           key={presetRub}
@@ -390,7 +390,7 @@ const ExchangePage: React.FC<ExchangePageProps> = ({
         selected={pickerMode === 'from' ? fromSide : toSide}
         exclude={pickerMode === 'from' ? toSide : fromSide}
         spotHoldings={spotHoldings}
-        balanceRub={balanceRub}
+        balanceUsd={balanceUsd}
         onSelect={pickerMode === 'from' ? setFromSide : setToSide}
         onClose={closePicker}
       />

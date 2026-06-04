@@ -7,8 +7,8 @@ import { useCurrency } from '../context/CurrencyContext';
 const SiteFooter: React.FC = () => {
   const { supportLink } = useUser();
   const { t } = useLanguage();
-  const { convertFromRub, symbol } = useCurrency();
-  const volume24h = (convertFromRub(12.4e9) / 1e9).toFixed(1) + ' млрд ' + symbol;
+  const { convertFromUsd, symbol } = useCurrency();
+  const volume24h = (convertFromUsd(12.4e9) / 1e9).toFixed(1) + ' млрд ' + symbol;
 
   return (
     <footer className="mt-8 px-4 pb-6 pt-4 border-t border-white/5 text-neutral-500">

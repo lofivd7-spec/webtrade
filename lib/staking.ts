@@ -56,15 +56,15 @@ export async function fetchStakingPositions(userId: number): Promise<StakingPosi
 /** Начислить накопленные часы стейкинга на баланс в валюте юзера (RUB). Вызывать перед загрузкой позиций при наличии цен. */
 export async function accrualToBalance(
   userId: number,
-  pricesRub: Record<string, number>
+  pricesUsd: Record<string, number>
 ): Promise<void> {
   const payload = Object.fromEntries(
-    Object.entries(pricesRub).filter(([, v]) => v != null && Number.isFinite(v) && v > 0)
+    Object.entries(pricesUsd).filter(([, v]) => v != null && Number.isFinite(v) && v > 0)
   );
   if (Object.keys(payload).length === 0) return;
   await supabase.rpc('staking_accrual_to_balance', {
     p_user_id: userId,
-    p_prices_rub: payload,
+    p_prices_usd: payload,
   });
 }
 
@@ -98,12 +98,12 @@ export interface UnstakeResult {
 export async function unstake(
   userId: number,
   ticker: string,
-  priceRub: number
+  priceUsd: number
 ): Promise<UnstakeResult> {
   const { data, error } = await supabase.rpc('staking_unstake', {
     p_user_id: userId,
     p_ticker: ticker,
-    p_price_rub: priceRub,
+    p_price_usd: priceUsd,
   });
   if (error) return { ok: false, error: getSupabaseErrorMessage(error, 'Ошибка операции') };
   const res = data as { ok?: boolean; error?: string; amount_returned?: number };

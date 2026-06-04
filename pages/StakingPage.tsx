@@ -211,13 +211,13 @@ const StakingPage: React.FC<StakingPageProps> = ({
             </div>
             {stakingPositions.map((position) => {
               const asset = liveMarket.find((item) => item.ticker === position.ticker);
-              const amountRub = (asset?.price ?? 0) * position.amount;
+              const amountUsd = (asset?.price ?? 0) * position.amount;
               return (
                 <div key={position.ticker} className="flex items-center justify-between gap-2 rounded-2xl bg-black/20 px-3 py-2.5 min-h-[56px]">
                   <div>
                     <p className="text-xs font-mono text-white">{position.ticker}</p>
                     <p className="text-[10px] text-neutral-500">
-                      {position.amount.toFixed(8)} {position.ticker} · ≈ {amountRub.toFixed(0)} {symbol}
+                      {position.amount.toFixed(8)} {position.ticker} · ≈ {amountUsd.toFixed(0)} {symbol}
                     </p>
                   </div>
                   <button

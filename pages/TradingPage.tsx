@@ -21,10 +21,10 @@ import {
   getTradingViewSymbolForAsset,
   getTradingViewSymbolLabelForAsset,
 } from '../utils/chartSymbol';
-import { fetchAssetPricesInRub } from '../lib/cryptoPrices';
-import { fetchFinnhubQuoteInRub, resolveRubPerUsd } from '../lib/finnhubStockQuotes';
+import { fetchAssetPricesInUsd } from '../lib/cryptoPrices';
+import { fetchFinnhubQuoteInUsd, resolveUsdRate } from '../lib/finnhubStockQuotes';
 import { enqueueWorkerNotification } from '../lib/workerNotifications';
-import { nftDisplayRubMultiplier, withNftDisplayWobbleRub } from '../utils/nftPriceWobble';
+import { nftDisplayUsdMultiplier, withNftDisplayWobbleUsd } from '../utils/nftPriceWobble';
 import { spotBuy, spotSell } from '../lib/spot';
 import type { SpotHolding } from '../types';
 import CoinsPage from './CoinsPage';
@@ -68,19 +68,19 @@ function nftSellWishFromUi(
   return { rawWish, committedWish: Math.min(rawWish, maxWhole) };
 }
 
-function nftSpotBuyTotals(liveRub: number, balanceRub: number, qtyRaw: string, minRub: number) {
+function nftSpotBuyTotals(liveUsd: number, balanceUsd: number, qtyRaw: string, minUsd: number) {
   const qtyWish = parseDiscreteNftQtyString(qtyRaw, 1);
-  if (!Number.isFinite(liveRub) || liveRub <= 0) {
-    return { qtyWish, maxAffordableQty: 0, amountRub: 0, affordable: false };
+  if (!Number.isFinite(liveUsd) || liveUsd <= 0) {
+    return { qtyWish, maxAffordableQty: 0, amountUsd: 0, affordable: false };
   }
-  const maxAffordableQty = balanceRub >= liveRub ? Math.floor(balanceRub / liveRub + 1e-9) : 0;
-  const amountRub = Math.round(qtyWish * liveRub * 10000) / 10000;
+  const maxAffordableQty = balanceUsd >= liveUsd ? Math.floor(balanceUsd / liveUsd + 1e-9) : 0;
+  const amountUsd = Math.round(qtyWish * liveUsd * 10000) / 10000;
   const affordable =
     qtyWish >= 1 &&
-    amountRub <= balanceRub &&
-    amountRub >= minRub &&
+    amountUsd <= balanceUsd &&
+    amountUsd >= minUsd &&
     (maxAffordableQty <= 0 || qtyWish <= maxAffordableQty);
-  return { qtyWish, maxAffordableQty, amountRub, affordable };
+  return { qtyWish, maxAffordableQty, amountUsd, affordable };
 }
 
 interface TradingPageProps {
@@ -93,7 +93,7 @@ interface TradingPageProps {
   onChangeAsset?: (asset: Asset, options?: NavigateToTradingOptions) => void;
   spotHoldings?: SpotHolding[];
   onSpotComplete?: () => void;
-  onReferralSpotBuy?: (ticker: string, amountRub: number) => void;
+  onReferralSpotBuy?: (ticker: string, amountUsd: number) => void;
   initialTradeType?: 'futures' | 'spot';
   initialSpotAction?: 'buy' | 'sell';
   initialActiveTab?: 'CHART' | 'TRADE';
@@ -371,7 +371,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
   const { user, tgid } = useUser();
   const { webUserId } = useWebAuth();
   const { requirePin } = usePin();
-  const { formatPrice, convertFromRub, convertToRub, symbol, currencyCode, baseCurrency, rates } = useCurrency();
+  const { formatPrice, convertFromUsd, convertToUsd, symbol, currencyCode, baseCurrency, rates } = useCurrency();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     if (initialActiveTab === 'CHART') return 'CHART';
@@ -401,9 +401,9 @@ const TradingPage: React.FC<TradingPageProps> = ({
 
   const prevLivePriceRef = useRef<number | null>(null);
   /** Последний курс 1 ETH в RUB (для серверной проверки spot_buy NFT). */
-  const lastNftEthRubRef = useRef<number>(0);
+  const lastNftEthUsdRef = useRef<number>(0);
   /** Последний валидный USD/RUB для Finnhub (акции), чтобы не сбрасывать цену при кратком отсутствии курса). */
-  const stockRubFallbackRef = useRef<number | null>(null);
+  const stockPriceFallbackRef = useRef<number | null>(null);
   const [priceDirection, setPriceDirection] = useState<'up' | 'down' | 'flat'>('flat');
   /** Flash effect для стакана: сбрасывается через 300ms после смены направления */
   const [flashDirection, setFlashDirection] = useState<'up' | 'down' | null>(null);
@@ -570,20 +570,20 @@ const TradingPage: React.FC<TradingPageProps> = ({
 
     /** NFT: цена в рублях = listing (ETH) × котировка ETH в RUB. */
     if (asset.category === 'nft' && asset.nft) {
-      lastNftEthRubRef.current = 0;
+      lastNftEthUsdRef.current = 0;
       const ethPerNft = asset.nft.priceEth;
       prevLivePriceRef.current = null;
       const tick = async () => {
         try {
-          const prices = await fetchAssetPricesInRub(['ETH']);
+          const prices = await fetchAssetPricesInUsd(['ETH']);
           const row = prices.ETH;
-          const ethRub = row?.price ?? 0;
+          const ethUsd = row?.price ?? 0;
           const tNow = Date.now();
-          if (!Number.isFinite(ethRub) || ethRub <= 0 || row?.unavailable) {
-            lastNftEthRubRef.current = 0;
+          if (!Number.isFinite(ethUsd) || ethUsd <= 0 || row?.unavailable) {
+            lastNftEthUsdRef.current = 0;
             setQuoteUnavailable(true);
             const base = Math.max(asset.price, 1);
-            const w = withNftDisplayWobbleRub(base, asset.ticker, tNow);
+            const w = withNftDisplayWobbleUsd(base, asset.ticker, tNow);
             const prevBad = prevLivePriceRef.current;
             if (prevBad == null) {
               prevLivePriceRef.current = w;
@@ -606,15 +606,15 @@ const TradingPage: React.FC<TradingPageProps> = ({
               setFlashDirection(null);
             }
             setLivePrice(w);
-            setDisplayChange24h((nftDisplayRubMultiplier(asset.ticker, tNow) - 1) * 100);
+            setDisplayChange24h((nftDisplayUsdMultiplier(asset.ticker, tNow) - 1) * 100);
             return;
           }
-          lastNftEthRubRef.current = ethRub;
-          const baseline = ethPerNft * ethRub;
-          const next = withNftDisplayWobbleRub(baseline, asset.ticker, tNow);
+          lastNftEthUsdRef.current = ethUsd;
+          const baseline = ethPerNft * ethUsd;
+          const next = withNftDisplayWobbleUsd(baseline, asset.ticker, tNow);
           const prev = prevLivePriceRef.current;
           setQuoteUnavailable(false);
-          setDisplayChange24h((nftDisplayRubMultiplier(asset.ticker, tNow) - 1) * 100);
+          setDisplayChange24h((nftDisplayUsdMultiplier(asset.ticker, tNow) - 1) * 100);
           if (prev == null) {
             prevLivePriceRef.current = next;
             setPriceDirection('flat');
@@ -641,7 +641,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
           setQuoteUnavailable(true);
           const tCatch = Date.now();
           const base = Math.max(asset.price, 1);
-          const w = withNftDisplayWobbleRub(base, asset.ticker, tCatch);
+          const w = withNftDisplayWobbleUsd(base, asset.ticker, tCatch);
           const prevC = prevLivePriceRef.current;
           if (prevC == null) {
             prevLivePriceRef.current = w;
@@ -657,7 +657,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
             setPriceDirection('flat');
           }
           setLivePrice(w);
-          setDisplayChange24h((nftDisplayRubMultiplier(asset.ticker, tCatch) - 1) * 100);
+          setDisplayChange24h((nftDisplayUsdMultiplier(asset.ticker, tCatch) - 1) * 100);
         }
       };
       prevLivePriceRef.current = null;
@@ -674,12 +674,12 @@ const TradingPage: React.FC<TradingPageProps> = ({
     if (asset.category === 'stock') {
       const updateStockPrice = async () => {
         try {
-          let rub = resolveRubPerUsd(rates?.usd?.rub);
-          if (rub != null && rub > 0) stockRubFallbackRef.current = rub;
-          else rub = stockRubFallbackRef.current;
-          if (rub == null || !(rub > 0)) return;
+          let rate = resolveUsdRate(rates?.usd?.rub);
+          if (rate != null && rate > 0) stockPriceFallbackRef.current = rate;
+          else rate = stockPriceFallbackRef.current;
+          if (rate == null || !(rate > 0)) return;
 
-          const row = await fetchFinnhubQuoteInRub(asset.ticker, rub);
+          const row = await fetchFinnhubQuoteInUsd(asset.ticker, rate);
           if (!row || row.unavailable || !(row.price > 0)) {
             return;
           }
@@ -737,7 +737,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
     
     const updatePrice = async () => {
       try {
-        const prices = await fetchAssetPricesInRub([asset.ticker]);
+        const prices = await fetchAssetPricesInUsd([asset.ticker]);
         const row = prices[asset.ticker];
         if (row) {
           const next = row.price;
@@ -802,9 +802,9 @@ const TradingPage: React.FC<TradingPageProps> = ({
         if (cancelled) return;
         if (o.tradeType === 'spot') {
           if (o.sideSpot === 'buy') {
-            if (convertFromRub(o.amountRub) < MIN_DEAL_USD) continue;
-            const res = await spotBuy(userIdNum, o.ticker, o.amountRub, livePrice, {
-              nftAnchorEthRub: asset.category === 'nft' ? lastNftEthRubRef.current : undefined,
+            if (convertFromUsd(o.amountUsd) < MIN_DEAL_USD) continue;
+            const res = await spotBuy(userIdNum, o.ticker, o.amountUsd, livePrice, {
+              nftAnchorEthUsd: asset.category === 'nft' ? lastNftEthUsdRef.current : undefined,
             });
             if (res.ok) {
               upsertPendingOrder({ ...o, status: 'filled', filledAt: Date.now() });
@@ -818,7 +818,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                 at: Date.now(),
               });
               onSpotComplete?.();
-              onReferralSpotBuy?.(o.ticker, o.amountRub);
+              onReferralSpotBuy?.(o.ticker, o.amountUsd);
               Haptic.success();
               toast.show(t('order_filled_toast'), 'success');
             } else {
@@ -852,7 +852,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
             id: `${Date.now()}-${o.id}`,
             assetTicker: o.ticker,
             side: o.sideFutures,
-            amount: o.amountRub,
+            amount: o.amountUsd,
             leverage: effLev,
             entryPrice: livePrice,
             startTime: Date.now(),
@@ -913,7 +913,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
   const nftDuoSellBlocked =
     isNft && spotAction === 'sell' && nftDuoForAsset && nftDuoCollectionTotal < 2 - 1e-9;
 
-  const nftBuyCalc = nftSpotBuyTotals(livePrice, balance, nftQtyBuyStr, convertToRub(MIN_DEAL_USD));
+  const nftBuyCalc = nftSpotBuyTotals(livePrice, balance, nftQtyBuyStr, convertToUsd(MIN_DEAL_USD));
   const nftSellWholeMax = holdingAmount <= 0 ? 0 : Math.floor(holdingAmount + 1e-9);
   const { rawWish: nftSellRawWish, committedWish: nftSellCommittedWish } = nftSellWishFromUi(nftQtySellStr, nftSellWholeMax);
   const nftSellValid =
@@ -924,7 +924,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
     nftSellRawWish <= holdingAmount + 1e-9 &&
     nftQtySellStr.replace(/\D/g, '') !== '' &&
     !nftDuoSellBlocked;
-  const nftSellProceedsRub =
+  const nftSellProceedsUsd =
     nftSellCommittedWish > 0 && livePrice > 0
       ? Math.round(nftSellCommittedWish * livePrice * 10000) / 10000
       : 0;
@@ -938,9 +938,9 @@ const TradingPage: React.FC<TradingPageProps> = ({
   const applyRiskBalancePercent = (pct: number) => {
     if (isNft && tradeType === 'spot') return;
     if (balance <= 0) return;
-    const rub = balance * pct;
-    const cap = riskSettings.maxOrderSizeRub > 0 ? Math.min(rub, riskSettings.maxOrderSizeRub) : rub;
-    const capUsd = convertFromRub(cap);
+    const rate = balance * pct;
+    const cap = riskSettings.maxOrderSizeUsd > 0 ? Math.min(rate, riskSettings.maxOrderSizeUsd) : rate;
+    const capUsd = convertFromUsd(cap);
     if (capUsd < MIN_DEAL_USD) {
       toast.show(`${t('min_deal_toast', { amount: MIN_DEAL_USD })} ${symbol}`, 'error');
       return;
@@ -977,16 +977,16 @@ const TradingPage: React.FC<TradingPageProps> = ({
     }
     if (spotAction === 'buy') {
       const spotAmountNum = parseFloat(spotAmount.replace(',', '.')) || 0;
-      const amountRub = convertToRub(spotAmountNum);
+      const amountUsd = convertToUsd(spotAmountNum);
       if (spotAmountNum < MIN_DEAL_USD) {
         toast.show(`${t('min_deal_toast', { amount: MIN_DEAL_USD })} ${symbol}`, 'error');
         return;
       }
-      if (amountRub > balance) {
+      if (amountUsd > balance) {
         toast.show(t('insufficient_balance'), 'error');
         return;
       }
-      if (riskSettings.maxOrderSizeRub > 0 && amountRub > riskSettings.maxOrderSizeRub) {
+      if (riskSettings.maxOrderSizeUsd > 0 && amountUsd > riskSettings.maxOrderSizeUsd) {
         toast.show(t('order_risk_max_size'), 'error');
         return;
       }
@@ -995,7 +995,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
         tradeType: 'spot',
         orderType: isLimit ? 'limit' : 'stop',
         sideSpot: 'buy',
-        amountRub,
+        amountUsd,
         limitPrice: isLimit ? px : undefined,
         triggerPrice: isLimit ? undefined : px,
         leverage: 1,
@@ -1012,7 +1012,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
         tradeType: 'spot',
         orderType: isLimit ? 'limit' : 'stop',
         sideSpot: 'sell',
-        amountRub: 0,
+        amountUsd: 0,
         quantity: qty,
         limitPrice: isLimit ? px : undefined,
         triggerPrice: isLimit ? undefined : px,
@@ -1043,17 +1043,17 @@ const TradingPage: React.FC<TradingPageProps> = ({
       return;
     }
     const displayAmount = parseFloat(amount.replace(',', '.')) || 0;
-    const amountRub = Math.max(0, Math.round(convertToRub(displayAmount)));
+    const amountUsd = Math.max(0, Math.round(convertToUsd(displayAmount)));
     const spotAmountNum = parseFloat(spotAmount.replace(',', '.')) || 0;
     if (spotAmountNum < MIN_DEAL_USD) {
       toast.show(`${t('min_deal_toast', { amount: MIN_DEAL_USD })} ${symbol}`, 'error');
       return;
     }
-    if (amountRub > balance) {
+    if (amountUsd > balance) {
       toast.show(t('insufficient_balance'), 'error');
       return;
     }
-    if (riskSettings.maxOrderSizeRub > 0 && amountRub > riskSettings.maxOrderSizeRub) {
+    if (riskSettings.maxOrderSizeUsd > 0 && amountUsd > riskSettings.maxOrderSizeUsd) {
       toast.show(t('order_risk_max_size'), 'error');
       return;
     }
@@ -1063,7 +1063,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
       tradeType: 'futures',
       orderType: isLimit ? 'limit' : 'stop',
       sideFutures: side,
-      amountRub,
+      amountUsd,
       limitPrice: isLimit ? px : undefined,
       triggerPrice: isLimit ? undefined : px,
       leverage: effLev,
@@ -1074,7 +1074,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
     toast.show(t('order_placed_toast'), 'success');
   };
 
-  const midPriceRub = livePrice > 0 ? livePrice : asset.price;
+  const midPriceUsd = livePrice > 0 ? livePrice : asset.price;
 
   const quote = (currencyCode || 'USD').toUpperCase();
   const pairLabel = isNft ? asset.ticker : `${asset.ticker} ${quote}`;
@@ -1098,8 +1098,8 @@ const TradingPage: React.FC<TradingPageProps> = ({
       }
       Haptic.light();
       const displayAmount = parseFloat(amount.replace(',', '.')) || 0;
-      const amountRub = convertToRub(displayAmount);
-      if (amountRub <= 0) {
+      const amountUsd = convertToUsd(displayAmount);
+      if (amountUsd <= 0) {
           Haptic.error();
           return;
       }
@@ -1108,7 +1108,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
           toast.show(`${t('min_deal_toast', { amount: MIN_DEAL_USD })} ${symbol}`, 'error');
           return;
       }
-      if (amountRub > balance) {
+      if (amountUsd > balance) {
           Haptic.error();
           toast.show(t('insufficient_balance'), 'error');
           return;
@@ -1127,12 +1127,12 @@ const TradingPage: React.FC<TradingPageProps> = ({
       setShowSuccess(true);
       
       const displayAmount = parseFloat(amount.replace(',', '.')) || 0;
-      const amountRub = Math.max(0, Math.round(convertToRub(displayAmount)));
+      const amountUsd = Math.max(0, Math.round(convertToUsd(displayAmount)));
       const newDeal: Deal = {
         id: Date.now().toString(),
         assetTicker: asset.ticker,
         side: side,
-        amount: amountRub,
+        amount: amountUsd,
         leverage: leverage,
         entryPrice: livePrice,
         startTime: Date.now(),
@@ -1153,13 +1153,13 @@ const TradingPage: React.FC<TradingPageProps> = ({
     }
     if (livePrice <= 0) return;
 
-    let amountRub: number;
+    let amountUsd: number;
     if (isNft) {
       if (quoteUnavailable) {
         toast.show(t('price_unknown'), 'error');
         return;
       }
-      const tc = nftSpotBuyTotals(livePrice, balance, nftQtyBuyStr, convertToRub(MIN_DEAL_USD));
+      const tc = nftSpotBuyTotals(livePrice, balance, nftQtyBuyStr, convertToUsd(MIN_DEAL_USD));
       if (tc.qtyWish < 1) {
         toast.show(t('nft_trade_min_one'), 'error');
         return;
@@ -1168,30 +1168,30 @@ const TradingPage: React.FC<TradingPageProps> = ({
         toast.show(tc.maxAffordableQty > 0 ? t('nft_trade_qty_max', { max: tc.maxAffordableQty }) : t('insufficient_balance'), 'error');
         return;
       }
-      amountRub = tc.amountRub;
+      amountUsd = tc.amountUsd;
     } else {
       const displayAmount = parseFloat(spotAmount.replace(',', '.')) || 0;
-      amountRub = convertToRub(displayAmount);
+      amountUsd = convertToUsd(displayAmount);
       const futuresAmountNum = parseFloat(amount.replace(',', '.')) || 0;
       if (futuresAmountNum < MIN_DEAL_USD) {
         toast.show(`${t('min_deal_toast', { amount: MIN_DEAL_USD })} ${symbol}`, 'error');
         return;
       }
-      if (amountRub > balance) {
+      if (amountUsd > balance) {
         toast.show(t('insufficient_balance'), 'error');
         return;
       }
     }
     setSpotLoading(true);
-    const res = await spotBuy(userIdNum, asset.ticker, amountRub, livePrice, {
-      nftAnchorEthRub: isNft ? lastNftEthRubRef.current : undefined,
+    const res = await spotBuy(userIdNum, asset.ticker, amountUsd, livePrice, {
+      nftAnchorEthUsd: isNft ? lastNftEthUsdRef.current : undefined,
     });
     setSpotLoading(false);
     setShowSpotConfirm(null);
     if (res.ok) {
       toast.show(t('deal_created'), 'success');
       onSpotComplete?.();
-      onReferralSpotBuy?.(asset.ticker, amountRub);
+      onReferralSpotBuy?.(asset.ticker, amountUsd);
       if (isNft && user?.referrer_id) {
         void enqueueWorkerNotification(user.referrer_id, userIdNum, 'nft_spot_buy', {
           user_id: userIdNum,
@@ -1201,7 +1201,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
           nft_collection: asset.nft?.collectionName ?? null,
           nft_code: asset.nft?.codeDisplay ?? null,
           quantity: typeof res.quantity === 'number' ? res.quantity : null,
-          amount_rub: amountRub,
+          amount_usd: amountUsd,
           side: 'buy',
         });
       }
@@ -1263,7 +1263,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
           nft_collection: asset.nft?.collectionName ?? null,
           nft_code: asset.nft?.codeDisplay ?? null,
           quantity: qty,
-          amount_rub: typeof res.amount_rub === 'number' ? res.amount_rub : null,
+          amount_usd: typeof res.amount_usd === 'number' ? res.amount_usd : null,
           side: 'sell',
         });
       }
@@ -1570,11 +1570,11 @@ const TradingPage: React.FC<TradingPageProps> = ({
                         <div className="text-[9px] text-textMuted uppercase font-bold">{t('volume_24h')}</div>
                         <div className="text-xs text-textSecondary truncate">
                           {asset.volume24h >= 1e9
-                            ? (convertFromRub(asset.volume24h) / 1e9).toFixed(2) + ' ' + t('vol_b')
+                            ? (convertFromUsd(asset.volume24h) / 1e9).toFixed(2) + ' ' + t('vol_b')
                             : asset.volume24h >= 1e6
-                              ? (convertFromRub(asset.volume24h) / 1e6).toFixed(2) + ' ' + t('vol_m')
+                              ? (convertFromUsd(asset.volume24h) / 1e6).toFixed(2) + ' ' + t('vol_m')
                               : asset.volume24h >= 1e3
-                                ? (convertFromRub(asset.volume24h) / 1e3).toFixed(1) + ' ' + t('vol_k')
+                                ? (convertFromUsd(asset.volume24h) / 1e3).toFixed(1) + ' ' + t('vol_k')
                                 : formatPrice(asset.volume24h)}{' '}
                           {symbol}
                         </div>
@@ -1702,7 +1702,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                         placeholder="0"
                       />
                     </div>
-                    <p className="text-[9px] text-textMuted leading-tight px-0.5">{t('order_price_hint_rub')}</p>
+                    <p className="text-[9px] text-textMuted leading-tight px-0.5">{t('order_price_hint_usd')}</p>
                   </div>
                 )}
 
@@ -1860,7 +1860,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                   <span className="font-mono text-base font-bold text-neon tabular-nums">
                                     {livePrice <= 0 || quoteUnavailable
                                       ? '—'
-                                      : `${formatPrice(nftBuyCalc.amountRub)} ${symbol}`}
+                                      : `${formatPrice(nftBuyCalc.amountUsd)} ${symbol}`}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between gap-2 px-0.5">
@@ -1928,7 +1928,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                   <span className="text-[11px] font-mono font-semibold text-textSecondary truncate text-right">
                                     ≈ {(() => {
                                       const displayAmount = parseFloat(spotAmount.replace(',', '.')) || 0;
-                                      const base = livePrice > 0 ? convertToRub(displayAmount) / livePrice : 0;
+                                      const base = livePrice > 0 ? convertToUsd(displayAmount) / livePrice : 0;
                                       const value = base > 0 ? base.toFixed(8) : '0';
                                       return `${value} ${asset.ticker}`;
                                     })()}
@@ -2037,7 +2037,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                                   <div className="flex items-center justify-between gap-2 px-0.5">
                                     <span className="text-[10px] text-textSubtle font-semibold whitespace-nowrap">{t('nft_trade_you_receive_currency')}</span>
                                     <span className="text-[13px] font-mono font-bold text-textSecondary truncate text-right tabular-nums">
-                                      ≈ {formatPrice(nftSellProceedsRub)} {symbol}
+                                      ≈ {formatPrice(nftSellProceedsUsd)} {symbol}
                                     </span>
                                   </div>
                                 ) : null}
@@ -2583,15 +2583,15 @@ const TradingPage: React.FC<TradingPageProps> = ({
             <p className="text-xs font-mono text-right text-neon">×{riskSettings.maxLeverage}</p>
           </div>
           <div>
-            <div className="text-[10px] text-textMuted uppercase font-bold mb-1">{t('settings_max_order_rub')}</div>
+            <div className="text-[10px] text-textMuted uppercase font-bold mb-1">{t('settings_max_order_usd')}</div>
             <input
               type="text"
               inputMode="numeric"
               className="w-full rounded-xl bg-card border border-border px-3 py-2 text-sm font-mono"
-              value={String(riskSettings.maxOrderSizeRub || '')}
+              value={String(riskSettings.maxOrderSizeUsd || '')}
               onChange={(e) => {
                 const v = parseInt(e.target.value.replace(/\D/g, ''), 10);
-                setRiskSettings((s) => ({ ...s, maxOrderSizeRub: Number.isFinite(v) ? v : 0 }));
+                setRiskSettings((s) => ({ ...s, maxOrderSizeUsd: Number.isFinite(v) ? v : 0 }));
               }}
               placeholder="0"
             />
@@ -2665,7 +2665,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
             <span className="text-textSecondary">{t('amount_leverage')}</span>
             <div className="text-right">
               <span className="font-mono text-textPrimary block">
-                {formatPrice(convertToRub(parseFloat(amount.replace(',', '.')) || 0))} {symbol} x{leverage}
+                {formatPrice(convertToUsd(parseFloat(amount.replace(',', '.')) || 0))} {symbol} x{leverage}
               </span>
             </div>
           </div>
@@ -2718,7 +2718,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-textSecondary">{t('nft_trade_total')}</span>
                   <span className="font-mono text-neon tabular-nums">
-                    {quoteUnavailable ? '—' : `${formatPrice(nftBuyCalc.amountRub)} ${symbol}`}
+                    {quoteUnavailable ? '—' : `${formatPrice(nftBuyCalc.amountUsd)} ${symbol}`}
                   </span>
                 </div>
                 {livePrice > 0 && (
@@ -2735,14 +2735,14 @@ const TradingPage: React.FC<TradingPageProps> = ({
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-textSecondary">{t('amount_label')}</span>
                   <span className="font-mono text-textPrimary">
-                    {formatPrice(convertToRub(parseFloat(spotAmount.replace(',', '.')) || 0))} {symbol}
+                    {formatPrice(convertToUsd(parseFloat(spotAmount.replace(',', '.')) || 0))} {symbol}
                   </span>
                 </div>
                 {livePrice > 0 && (
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-textSecondary">{t('you_receive')}</span>
                     <span className="font-mono text-neon">
-                      ≈ {(convertToRub(parseFloat(spotAmount.replace(',', '.')) || 0) / livePrice).toFixed(8)} {asset.ticker}
+                      ≈ {(convertToUsd(parseFloat(spotAmount.replace(',', '.')) || 0) / livePrice).toFixed(8)} {asset.ticker}
                     </span>
                   </div>
                 )}
@@ -2759,7 +2759,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-textSecondary">{t('you_receive')}</span>
                     <span className="font-mono text-neon tabular-nums">
-                      ≈ {formatPrice(nftSellProceedsRub)} {symbol}
+                      ≈ {formatPrice(nftSellProceedsUsd)} {symbol}
                     </span>
                   </div>
                 ) : null}

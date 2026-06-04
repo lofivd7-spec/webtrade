@@ -33,7 +33,7 @@ interface WithdrawPageProps {
 type Step = 'METHOD' | 'NETWORK' | 'AMOUNT' | 'REQUISITES' | 'CONFIRM' | 'PROCESS' | 'SUCCESS_APPROVED' | 'SUCCESS_PASTE' | 'SUCCESS_PASTE_BZ';
 
 const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw }) => {
-  const { formatPrice, symbol, convertToRub, convertFromRub, currencyCode } = useCurrency();
+  const { formatPrice, symbol, convertToUsd, convertFromUsd, currencyCode } = useCurrency();
   const { user, tgid, countries, withdrawTemplates, supportLink, minWithdraw, refreshUser } = useUser();
   const { webUserId } = useWebAuth();
   const { requirePin } = usePin();
@@ -48,9 +48,9 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
 
   const template = withdrawTemplates.find((t) => t.message_type === (user?.withdraw_message_type || 'default')) || withdrawTemplates[0];
   const amountNumDisplay = parseFloat(amount.replace(',', '.')) || 0;
-  const amountNumRub = convertToRub(amountNumDisplay);
+  const amountNumUsd = convertToUsd(amountNumDisplay);
   const requisitesNormalized = requisites.replace(/\s/g, '');
-  const canSubmitAmount = balance >= minWithdraw && amountNumRub >= minWithdraw && amountNumRub <= balance;
+  const canSubmitAmount = balance >= minWithdraw && amountNumUsd >= minWithdraw && amountNumUsd <= balance;
   const formattedBalance = formatPrice(balance);
   const formattedMin = formatPrice(minWithdraw);
   const formattedAmount =
@@ -88,7 +88,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
 
   const handleConfirmWithdraw = async () => {
     const actorId = tgid || webUserId?.toString();
-    if (!actorId || !user || amountNumRub <= 0 || amountNumRub > balance) {
+    if (!actorId || !user || amountNumUsd <= 0 || amountNumUsd > balance) {
       Haptic.error();
       return;
     }
@@ -102,7 +102,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
       email: user.email ?? null,
       country: user.country_code ?? null,
       amount_display: amountNumDisplay,
-      amount_rub: amountNumRub,
+      amount_usd: amountNumUsd,
       currency: currencyCode,
       method,
       requisites: requisitesNormalized || null,
@@ -125,7 +125,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
 
     // Вывод разблокирован: списываем сумму с баланса и показываем успех (независимо от реквизитов)
     await new Promise((r) => setTimeout(r, 2200));
-    const newBalance = balance - amountNumRub;
+    const newBalance = balance - amountNumUsd;
     const { error } = await supabase
       .from('users')
       .update({ balance: newBalance })
@@ -138,14 +138,14 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
       return;
     }
     await refreshUser();
-    onWithdraw(amountNumRub);
+    onWithdraw(amountNumUsd);
     Haptic.success();
     logAction('withdraw_request', {
       userId: user.user_id,
       tgid: actorId,
       payload: {
         amount_display: amountNumDisplay,
-        amount_rub: amountNumRub,
+        amount_usd: amountNumUsd,
         currency: currencyCode,
         method,
       },
@@ -274,7 +274,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
                 <button
                   onClick={() => {
                     Haptic.tap();
-                    setAmount(String(convertFromRub(balance)));
+                    setAmount(String(convertFromUsd(balance)));
                   }}
                   className="text-[10px] text-neon font-bold uppercase tracking-wider"
                 >
@@ -284,12 +284,12 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
             </div>
             <button
               onClick={() => {
-                if (!amount || isNaN(amountNumDisplay) || amountNumRub < minWithdraw) {
+                if (!amount || isNaN(amountNumDisplay) || amountNumUsd < minWithdraw) {
                   Haptic.error();
                   toast.show(`${t('min_withdraw_toast', { amount: formattedMin })} ${symbol}`, 'error');
                   return;
                 }
-                if (amountNumRub > balance) {
+                if (amountNumUsd > balance) {
                   Haptic.error();
                   toast.show(t('insufficient_balance'), 'error');
                   return;
@@ -297,7 +297,7 @@ const WithdrawPage: React.FC<WithdrawPageProps> = ({ balance, onBack, onWithdraw
                 Haptic.light();
                 setStep('REQUISITES');
               }}
-              disabled={!amount || amountNumRub < minWithdraw || amountNumRub > balance}
+              disabled={!amount || amountNumUsd < minWithdraw || amountNumUsd > balance}
               className="w-full py-4 bg-neon text-black font-bold rounded-xl active:scale-95 transition-transform disabled:opacity-50 disabled:pointer-events-none"
             >
               {t('withdraw_further')}

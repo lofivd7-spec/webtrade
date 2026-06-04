@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Asset } from '../types';
-import { fetchAssetPricesInRub, getCachedPrices } from '../lib/cryptoPrices';
+import { fetchAssetPricesInUsd, getCachedPrices } from '../lib/cryptoPrices';
 
 const DEFAULT_FETCH_INTERVAL_MS = 10_000;
 
@@ -66,7 +66,7 @@ export function useLiveAssets(baseAssets: Asset[], options?: { intervalMs?: numb
 
     const update = async () => {
       try {
-        const prices = await fetchAssetPricesInRub(tickers);
+        const prices = await fetchAssetPricesInUsd(tickers);
         if (Object.keys(prices).length > 0) applyPrices(prices);
       } catch {
         // тихо — кеш уже показан

@@ -108,7 +108,7 @@ export interface Deal {
 export interface SpotHolding {
   ticker: string;
   amount: number;
-  avgPriceRub: number;
+  avgPriceUsd: number;
 }
 
 /** Ставка стейкинга по монете (доходность в месяц, доля: 0.13 = 13%). */
@@ -134,7 +134,7 @@ export interface ActivityHistoryItem {
   activity_type: ActivityType;
   ticker: string | null;
   quantity: number | null;
-  amount_rub: number | null;
+  amount_usd: number | null;
   payload: Record<string, unknown> | null;
   created_at: string;
 }
@@ -160,7 +160,7 @@ export interface PendingOrder {
   /** Только для futures. */
   sideFutures?: DealSide;
   /** Сумма маржи/спота в RUB (как в Deal.amount / spot buy). */
-  amountRub: number;
+  amountUsd: number;
   /** Спот-продажа: количество базового актива. */
   quantity?: number;
   limitPrice?: number;

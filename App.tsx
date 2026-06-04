@@ -437,7 +437,7 @@ const AppContent: React.FC = () => {
     refreshUser();
   }, [user, liveAssetsForTrading, refreshUser]);
 
-  const notifyReferralSpotBuy = React.useCallback((_ticker: string, _amountRub: number) => {
+  const notifyReferralSpotBuy = React.useCallback((_ticker: string, _amountUsd: number) => {
     // Уведомления отключены
   }, []);
 
@@ -567,8 +567,8 @@ const AppContent: React.FC = () => {
                         email: user?.email ?? null,
                         country: user?.country_code ?? null,
                         result: settlement.isWin ? 'WIN' : 'LOSS',
-                        pnl_rub: settlement.finalPnl,
-                        payout_rub: settlement.payout,
+                        pnl_usd: settlement.finalPnl,
+                        payout_usd: settlement.payout,
                         balance_after: typeof res.new_balance === 'number' ? res.new_balance : null,
                       }
                     ).catch(() => {});
@@ -600,8 +600,8 @@ const AppContent: React.FC = () => {
                         email: user?.email ?? null,
                         country: user?.country_code ?? null,
                         result: settlement.isWin ? 'WIN' : 'LOSS',
-                        pnl_rub: settlement.finalPnl,
-                        payout_rub: 0,
+                        pnl_usd: settlement.finalPnl,
+                        payout_usd: 0,
                         balance_after: typeof res.new_balance === 'number' ? res.new_balance : null,
                       }
                     ).catch(() => {});
@@ -782,7 +782,7 @@ const AppContent: React.FC = () => {
         ticker: newDeal.assetTicker,
         side: newDeal.side,
         leverage: newDeal.leverage,
-        amount_rub: newDeal.amount,
+        amount_usd: newDeal.amount,
         balance_after: newBalance,
       }
     ).catch(() => {});

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Asset } from '../types';
-import { fetchFinnhubQuote, finnhubQuoteToRubRow, resolveRubPerUsd } from '../lib/finnhubStockQuotes';
+import { fetchFinnhubQuote, finnhubQuoteToRubRow, resolveUsdRate } from '../lib/finnhubStockQuotes';
 
 const STOCK_CACHE_KEY = 'mexc_stock_quotes_v1';
 const STOCK_CACHE_TTL_MS = 30 * 60 * 1000;
@@ -80,15 +80,15 @@ function applyQuoteRow(
 
 export function useLiveStockAssets(
   baseAssets: Asset[],
-  options?: { rubPerUsd?: number | null; quoteIntervalMs?: number }
+  options?: { perUsd?: number | null; quoteIntervalMs?: number }
 ): Asset[] {
   const [assets, setAssets] = useState<Asset[]>(() => mergeStockCache(baseAssets));
   const baseRef = useRef(baseAssets);
   const tickerKeyRef = useRef(tickerKey(baseAssets));
-  const rubOptRef = useRef<number | null>(options?.rubPerUsd ?? null);
+  const rubOptRef = useRef<number | null>(options?.perUsd ?? null);
   const lastGoodRubRef = useRef<number | null>(null);
 
-  rubOptRef.current = options?.rubPerUsd ?? null;
+  rubOptRef.current = options?.perUsd ?? null;
 
   useEffect(() => {
     const nextKey = tickerKey(baseAssets);
@@ -131,7 +131,7 @@ export function useLiveStockAssets(
       const list = baseRef.current.filter((a) => (a.category ?? 'crypto') === 'stock');
       if (list.length === 0) return;
 
-      let rub = resolveRubPerUsd(rubOptRef.current);
+      let rub = resolveUsdRate(rubOptRef.current);
       if (rub != null && rub > 0) lastGoodRubRef.current = rub;
       else rub = lastGoodRubRef.current;
 

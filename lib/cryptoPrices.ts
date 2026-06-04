@@ -16,7 +16,7 @@ const PRICES_API_PATH = '/api/prices';
 const CACHE_KEY = 'etoro_crypto_prices_v3';
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8_000;
-const MARKET_USD_RUB_KEY = 'mexc_market_usd_rub_v1';
+const MARKET_USD_KEY = 'mexc_market_usd_rub_v1';
 
 /** Из последней загрузки market_quotes — для перевода баланса/отображения USD без смешения с Forex API. */
 let marketUsdRubMem: number | null = null;
@@ -25,14 +25,14 @@ export function setMarketUsdToRub(v: number | null | undefined): void {
   if (typeof v !== 'number' || !Number.isFinite(v) || v < 55 || v > 220) return;
   marketUsdRubMem = v;
   try {
-    localStorage.setItem(MARKET_USD_RUB_KEY, JSON.stringify({ v, ts: Date.now() }));
+    localStorage.setItem(MARKET_USD_KEY, JSON.stringify({ v, ts: Date.now() }));
   } catch {}
 }
 
 export function getMarketUsdToRub(): number | null {
   if (typeof marketUsdRubMem === 'number' && marketUsdRubMem > 0) return marketUsdRubMem;
   try {
-    const raw = localStorage.getItem(MARKET_USD_RUB_KEY);
+    const raw = localStorage.getItem(MARKET_USD_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { v?: number; ts?: number } | null;
     const x = Number(parsed?.v);
@@ -239,7 +239,7 @@ export function prefetchCryptoPrices(tickers: string[]): void {
   });
 }
 
-export async function fetchAssetPricesInRub(tickers: string[]): Promise<Record<string, CoinPriceData>> {
+export async function fetchAssetPricesInUsd(tickers: string[]): Promise<Record<string, CoinPriceData>> {
   if (!tickers.length) return {};
   try {
     return await fetchCryptoPricesInRub([...new Set(tickers.map((t) => t.toUpperCase()))]);
