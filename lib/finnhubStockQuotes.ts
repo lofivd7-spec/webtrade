@@ -51,16 +51,15 @@ export async function fetchFinnhubQuote(symbol: string): Promise<FinnhubQuoteJso
 
 export function finnhubQuoteToRubRow(
   q: FinnhubQuoteJson | null,
-  perUsd: number | null
+  _perUsd: number | null
 ): { price: number; change24h: number; unavailable: boolean } {
   const usd = Number(q?.c);
-  const rub = perUsd && perUsd > 0 && Number.isFinite(usd) && usd > 0 ? usd * perUsd : 0;
   const dp = Number(q?.dp);
   const change24h = Number.isFinite(dp) ? dp : 0;
   return {
-    price: rub,
+    price: Number.isFinite(usd) && usd > 0 ? usd : 0,
     change24h,
-    unavailable: !(rub > 0),
+    unavailable: !(usd > 0),
   };
 }
 

@@ -200,7 +200,7 @@ export async function fetchCryptoPricesInRub(tickers: string[]): Promise<Record<
   for (const t of upper) {
     if (!t) continue;
     if (t === 'USDT') {
-      merged[t] = { price: usdRub, change24h: 0 };
+      merged[t] = { price: 1.0, change24h: 0 };
       continue;
     }
     const sym = symForTicker(t);

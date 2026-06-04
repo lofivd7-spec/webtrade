@@ -7,8 +7,8 @@
  * Если после Binance есть дыры — CoinLore `/api/ticker`, затем CoinGecko simple/price (мапинги в отдельных файлах).
  */
 
-import { COINGECKO_ID_BY_TICKER } from './pricesCoingeckoMap';
-import { COINLORE_ID_BY_TICKER } from './pricesCoinloreMap';
+import { COINGECKO_ID_BY_TICKER } from './pricesCoingeckoMap.js';
+import { COINLORE_ID_BY_TICKER } from './pricesCoinloreMap.js';
 
 type PricesResponse = {
   usdToRub: number;
@@ -257,7 +257,7 @@ async function fetchCoinloreFill(
         for (const binanceKey of targets) {
           if (filledKeys.has(binanceKey)) continue;
           out[binanceKey] = {
-            price: px * usdToRub,
+            price: px,
             change24h: Number.isFinite(chRaw) ? chRaw : 0,
           };
         }
@@ -324,7 +324,7 @@ async function fetchCoingeckoFill(
         if (!syms?.length || !Number.isFinite(px) || px <= 0) continue;
         for (const binanceKey of syms) {
           if (filledKeys.has(binanceKey)) continue;
-          out[binanceKey] = { price: px * usdToRub, change24h: Number.isFinite(ch) ? ch : 0 };
+          out[binanceKey] = { price: px, change24h: Number.isFinite(ch) ? ch : 0 };
         }
       }
     } catch {
@@ -343,7 +343,7 @@ function rowsToPrices(rows: Binance24hTickerRow[], usdToRub: number): PricesResp
     if (!Number.isFinite(lastPrice) || lastPrice <= 0) continue;
     const change24h = change24hPercentFromBinanceTicker(item);
     prices[symKey] = {
-      price: lastPrice * usdToRub,
+      price: lastPrice,
       change24h: Number.isFinite(change24h) ? change24h : 0,
     };
   }
