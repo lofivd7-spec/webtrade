@@ -99,7 +99,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
         return { holding: h, asset, row, price: priceUsd || h.avgPriceRub, valueUsd };
       })
       .filter((r): r is NonNullable<typeof r> => r != null)
-      .filter((r) => Number.isFinite(r.valueUsd));
+      .filter((r) => Number.isFinite(r.valueUsd) && (r.holding.amount ?? 0) > 1e-6);
     rows.sort((a, b) => b.valueUsd - a.valueUsd);
     return rows;
   }, [spotHoldings, assetsByTicker, nftListingBySpotTicker, now, ethUsdNft, refNftPriceMap]);

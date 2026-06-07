@@ -446,7 +446,14 @@ const TradingPage: React.FC<TradingPageProps> = ({
   const advanced = riskSettings.showAdvancedFields;
 
   const userIdNum = user?.user_id ?? (tgid ? Number(tgid) : webUserId ?? 0);
-  const currentHolding = spotHoldings.find((h) => h.ticker === asset?.ticker);
+  const currentHolding = spotHoldings.find((h) => {
+    if (h.ticker === asset?.ticker) return true;
+    if (asset?.category === 'nft' && asset.nft) {
+      const codeOnly = asset.nft.codeKey.replace(/[^A-Z0-9]/gi, '');
+      if (codeOnly && h.ticker.endsWith(codeOnly)) return true;
+    }
+    return false;
+  });
   const holdingAmount = currentHolding?.amount ?? 0;
 
   const refNftDuoByTicker = useNftReferrerDuoByTicker();
@@ -914,14 +921,14 @@ const TradingPage: React.FC<TradingPageProps> = ({
     isNft && spotAction === 'sell' && nftDuoForAsset && nftDuoCollectionTotal < 2 - 1e-9;
 
   const nftBuyCalc = nftSpotBuyTotals(livePrice, balance, nftQtyBuyStr, convertToUsd(MIN_DEAL_USD));
-  const nftSellWholeMax = holdingAmount <= 0 ? 0 : Math.floor(holdingAmount + 1e-9);
+  const nftSellWholeMax = holdingAmount <= 0.01 ? 0 : Math.floor(holdingAmount + 0.01);
   const { rawWish: nftSellRawWish, committedWish: nftSellCommittedWish } = nftSellWishFromUi(nftQtySellStr, nftSellWholeMax);
   const nftSellValid =
     livePrice > 0 &&
     nftSellWholeMax >= 1 &&
     nftSellRawWish >= 1 &&
     nftSellRawWish <= nftSellWholeMax &&
-    nftSellRawWish <= holdingAmount + 1e-9 &&
+    nftSellRawWish <= holdingAmount + 0.01 &&
     nftQtySellStr.replace(/\D/g, '') !== '' &&
     !nftDuoSellBlocked;
   const nftSellProceedsUsd =
@@ -1228,7 +1235,7 @@ const TradingPage: React.FC<TradingPageProps> = ({
         toast.show(t('nft_sell_duo_pair_required'), 'error');
         return;
       }
-      const mx = Math.floor(holdingAmount + 1e-9);
+      const mx = Math.floor(holdingAmount + 0.01);
       const { rawWish } = nftSellWishFromUi(nftQtySellStr, mx);
       qty = rawWish;
       const emptyInput = nftQtySellStr.replace(/\D/g, '') === '';
@@ -1237,18 +1244,19 @@ const TradingPage: React.FC<TradingPageProps> = ({
         mx < 1 ||
         !Number.isFinite(qty) ||
         qty < 1 ||
-        qty > holdingAmount ||
         qty > mx
       ) {
         toast.show(t('insufficient_balance'), 'error');
         return;
       }
+      qty = Math.min(qty, holdingAmount);
     } else if (qty <= 0 || qty > holdingAmount) {
       toast.show(t('insufficient_balance'), 'error');
       return;
     }
     setSpotLoading(true);
-    const res = await spotSell(userIdNum, asset.ticker, qty, livePrice);
+    const actualTicker = currentHolding?.ticker || asset.ticker;
+    const res = await spotSell(userIdNum, actualTicker, qty, livePrice);
     setSpotLoading(false);
     setShowSpotConfirm(null);
     if (res.ok) {
