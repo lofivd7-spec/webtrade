@@ -43,20 +43,17 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, onNavigate, embedded
         return (
           <button
             key={item.id}
-            onClick={() => { Haptic.tap(); onNavigate(item.id); }}
-            className="touch-target nav-item flex flex-col items-center justify-center flex-1 min-w-0 gap-1 py-1.5"
+            onClick={() => { Haptic.medium(); onNavigate(item.id); }}
+            className={`relative touch-target nav-item flex flex-col items-center justify-center flex-1 min-w-0 gap-1 py-2 ${isActive ? 'text-textPrimary' : 'text-textSubtle hover:text-textSecondary transition-colors'}`}
             aria-current={isActive ? 'page' : undefined}
           >
-            <div className={`flex items-center justify-center rounded-2xl ${isActive ? 'nav-icon-pill' : ''}`}>
-              <div className="h-8 w-10 flex items-center justify-center">
-                <Icon active={isActive} className={isActive ? 'text-textPrimary' : 'text-textSubtle'} size={19} />
-              </div>
+            {isActive && (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-accent rounded-b-full" />
+            )}
+            <div className="flex items-center justify-center h-8 w-10 mt-1">
+              <Icon active={isActive} size={22} />
             </div>
-            <span
-              className={`text-[10px] font-semibold tracking-tight transition-colors duration-200 truncate w-full text-center leading-none ${
-                isActive ? 'text-textPrimary' : 'text-textSubtle'
-              }`}
-            >
+            <span className="text-[10px] font-semibold tracking-wide w-full text-center leading-none mt-0.5">
               {item.label}
             </span>
           </button>

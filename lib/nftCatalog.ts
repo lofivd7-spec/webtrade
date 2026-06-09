@@ -6,25 +6,7 @@
 import type { Asset, AssetCategory, NftMeta } from '../types';
 
 /** Строки «как в CSV» после trim. Формат: collection_name,nft_code,price_eth,image_url */
-export const NFT_SEED_CSV_ROWS: string[] = [
-  'Bored Ape Yacht Club,#7986,10.878,https://i2c.seadn.io/base/0xcc7b00f71d36e0ac5bffb42b49e1713869ab0bed/f9927735bc1741381031cf48df0166/3bf9927735bc1741381031cf48df0166.png?w=1000',
-  'Bored Ape Yacht Club,#9812,10.88,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/5cce905934cd1a9d5532492978c923/875cce905934cd1a9d5532492978c923.png?w=1000',
-  'Bored Ape Yacht Club,#3905,10.88,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/bf9d9bf62395d7b7954bf616b5eba6/47bf9d9bf62395d7b7954bf616b5eba6.png?w=1000',
-  'Bored Ape Yacht Club,#5770,10.98,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/84e93848c566b824700a63c210893d/ca84e93848c566b824700a63c210893d.png?w=1000',
-  'Bored Ape Yacht Club,#6398,10.99,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/193cf57a760bc4ea1f334045f7b349/b8193cf57a760bc4ea1f334045f7b349.png?w=1000',
-  'Bored Ape Yacht Club,#6922,11.15,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/da84c69123539dd7059e435fb812ed/f1da84c69123539dd7059e435fb812ed.png?w=1000',
-  'Bored Ape Yacht Club,#5769,11.39,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/a0b02ea16d17b39d45f6d44288f245/2ba0b02ea16d17b39d45f6d44288f245.png?w=1000',
-  'Bored Ape Yacht Club,#3644,11.40,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/3de307c603970cb99eb92cb47b34a4/273de307c603970cb99eb92cb47b34a4.png?w=1000',
-  'Bored Ape Yacht Club,#2476,11.49,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/9f6f37d4a12dc538d48e95003b6ffa/279f6f37d4a12dc538d48e95003b6ffa.png?w=1000',
-  'Bored Ape Yacht Club,#9695,11.52,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/e53e7d7f72294fd5aeea11bffbdd27/0be53e7d7f72294fd5aeea11bffbdd27.png?w=1000',
-  'Bored Ape Yacht Club,#5834,11.79,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/622090ca9f95534d14ace6e6e833e1/03622090ca9f95534d14ace6e6e833e1.png?w=1000',
-  'Bored Ape Yacht Club,#6137,11.80,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/1f4257689282e70f0615bc2f999aaf/4d1f4257689282e70f0615bc2f999aaf.png?w=1000',
-  'Bored Ape Yacht Club,#9849,11.92,https://i2c.seadn.io/base/0x7e72abdf47bd21bf0ed6ea8cb8dad60579f3fb50/76b4d9470446b9e03ee3ae4ea248b1/9a76b4d9470446b9e03ee3ae4ea248b1.png?w=1000',
-  'Pudgy Penguins,#2746,5.61,https://i2c.seadn.io/base/0xe26e46742f7a0d53e71dadfb890374e8d28dfb6e/26927cdd9a81d9bb7c7a0e9ca20765/fc26927cdd9a81d9bb7c7a0e9ca20765.png?w=1000',
-  'Pudgy Penguins,#2718,5.63,https://i2c.seadn.io/ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/afe847dd2bcfca0deafb50e9a60b6526.png?w=1000',
-  'Pudgy Penguins,#6447,5.63,https://i2c.seadn.io/ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/432f3d41b5e3f8890a4766753fca05b2.png?w=1000',
-  'Pudgy Penguins,#1192,5.635,https://i2c.seadn.io/base/0xe26e46742f7a0d53e71dadfb890374e8d28dfb6e/6d96a86e11832e3434f677e97276bf/1b6d96a86e11832e3434f677e97276bf.png?w=1000',
-];
+export const NFT_SEED_CSV_ROWS: string[] = [];
 
 export type NftListingRow = {
   /** Строка public.nft_listings.id если подгружали из БД */

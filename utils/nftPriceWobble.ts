@@ -10,10 +10,10 @@ export function nftDisplayUsdMultiplier(seed: string, timeMs: number): number {
   }
   const s = ((h >>> 0) % 10000) / 10000;
   const t = timeMs * 0.001;
-  const minPct = 0.005;
-  const maxPct = 0.05;
-  const amp = minPct + (Math.sin(t * 0.19 + s * 6.28318530718) * 0.5 + 0.5) * (maxPct - minPct);
-  const wave = Math.sin(t * 0.71 + s * 9.17) * amp;
+  const minPct = 0.001;
+  const maxPct = 0.005;
+  const amp = minPct + (Math.sin(t * 0.03 + s * 6.28318530718) * 0.5 + 0.5) * (maxPct - minPct);
+  const wave = Math.sin(t * 0.05 + s * 9.17) * amp;
   return 1 + wave;
 }
 

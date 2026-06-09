@@ -21,7 +21,7 @@ import { MARKET_ASSETS } from '../constants';
 import { fetchAssetPricesInUsd } from '../lib/cryptoPrices';
 import { useLiveAssets } from '../utils/useLiveAssets';
 import { withNftDisplayWobbleUsd } from '../utils/nftPriceWobble';
-import { enrichNftListingRow, useNftReferrerPriceMap } from '../lib/nftReferrerPricing';
+import { enrichNftListingRow, useNftReferrerPriceMap, useNftMarketJitter } from '../lib/nftReferrerPricing';
 import { fetchActivityHistory } from '../lib/activityHistory';
 import {
   getAllNftListings,
@@ -61,6 +61,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
   const [now, setNow] = useState(Date.now());
   const [ethUsdNft, setEthRubNft] = useState(0);
   const refNftPriceMap = useNftReferrerPriceMap();
+  const jitter = useNftMarketJitter();
   const [activityHistory, setActivityHistory] = useState<ActivityHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const liveAssets = useLiveAssets(MARKET_ASSETS);
@@ -85,7 +86,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
         const row = nftListingBySpotTicker.get(h.ticker);
         if (!row) return null;
         const live = assetsByTicker[h.ticker];
-        const rowPriced = enrichNftListingRow(row, refNftPriceMap);
+        const rowPriced = enrichNftListingRow(row, refNftPriceMap, jitter);
         const baseUsd =
           ethUsdNft > 0
             ? rowPriced.priceEth * ethUsdNft
@@ -621,7 +622,7 @@ const DealsPage: React.FC<DealsPageProps> = ({
                       <p className="text-xs text-textMuted leading-snug">{t('portfolio_nfts_hint')}</p>
                     </div>
                   ) : (
-                    <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 snap-x snap-mandatory scroll-pl-4 -mx-4 pl-4 pr-4 scroll-smooth">
+                    <div className="rounded-2xl overflow-hidden bg-card border border-border divide-y divide-border">
                       {nftPortfolioRows.map(({ holding, asset, row, price, valueUsd }) => {
                         const qtyRounded = Math.round((holding.amount ?? 0) * 1000) / 1000;
                         const qtyLabel =
@@ -636,45 +637,34 @@ const DealsPage: React.FC<DealsPageProps> = ({
                               Haptic.tap();
                               onNavigateToTrading(asset, { tradeType: 'spot', spotAction: 'sell' });
                             }}
-                            className="snap-start shrink-0 w-[min(78vw,254px)] sm:w-[238px] text-left rounded-2xl overflow-hidden bg-card border border-border shadow-lg shadow-black/30 active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/40"
+                            className="w-full text-left px-3 py-3 flex items-center gap-3 min-h-[64px] active:bg-[#121723] transition-colors"
                             aria-label={`${row.collectionName} ${row.codeDisplay} · ${t('sell')}`}
                           >
-                            <div className="relative aspect-[4/5] bg-black/50">
+                            <div className="h-12 w-12 shrink-0 rounded-xl bg-black/50 overflow-hidden relative border border-[#1a202f]">
                               <img
                                 src={row.imageUrl}
                                 alt=""
                                 className="absolute inset-0 h-full w-full object-cover"
                                 loading="lazy"
                               />
-                              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
-                              <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-[#0a0d14]/90 px-2 py-1 border border-[#1a202f]">
-                                <span className="text-[10px] font-mono font-bold text-neon tabular-nums">
-                                  {qtyLabel}{' '}
-                                  <span className="font-normal text-textMuted">{t('portfolio_units_label')}</span>
-                                </span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-mono text-[14px] font-bold text-textPrimary">{row.codeDisplay}</span>
+                                <span className="text-[10px] text-textMuted truncate">{row.collectionName}</span>
                               </div>
-                              <p className="absolute bottom-2.5 left-3 right-3 font-mono text-[13px] font-bold text-white leading-tight drop-shadow-lg line-clamp-2">
-                                {row.codeDisplay}
+                              <p className="text-[11px] text-textMuted font-mono mt-0.5 tabular-nums">
+                                {qtyLabel} {t('portfolio_units_label')} · {price > 0 ? formatPrice(price) : '—'} {symbol}
                               </p>
                             </div>
-                            <div className="p-3 space-y-2">
-                              <p className="text-[11px] text-textMuted leading-snug line-clamp-2 min-h-[2.25rem]">
-                                {row.collectionName}
-                              </p>
-                              <div className="flex items-end justify-between gap-2">
-                                <div className="min-w-0">
-                                  <p className="text-[15px] font-mono font-bold text-textPrimary tabular-nums truncate">
-                                    {formatPrice(valueUsd)} {symbol}
-                                  </p>
-                                  <p className="text-[10px] text-textMuted font-mono tabular-nums mt-0.5">
-                                    ~ {price > 0 ? formatPrice(price) : '—'} {symbol}/{t('portfolio_units_label')}
-                                  </p>
-                                </div>
-                                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold text-neon bg-[#121723] border border-[#1a202f] px-2.5 py-1 rounded-lg">
-                                  <ArrowDownRight size={14} aria-hidden />
-                                  {t('sell')}
-                                </span>
+                            <div className="text-right shrink-0 flex items-center gap-2">
+                              <div>
+                                <p className="font-mono text-[14px] font-bold text-textPrimary tabular-nums">
+                                  {formatPrice(valueUsd)} {symbol}
+                                </p>
+                                <p className="text-[10px] text-textMuted font-mono tabular-nums">{currencyCode}</p>
                               </div>
+                              <ChevronRight size={18} className="text-textMuted opacity-75" aria-hidden />
                             </div>
                           </button>
                         );

@@ -61,7 +61,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ showBalanceTitle: _showBalanceT
           onClick={() => { Haptic.tap(); onSearch?.(); }}
           className="touch-target h-11 w-11 rounded-full flex items-center justify-center hover:bg-card active:scale-[0.97] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/30 flex-shrink-0"
         >
-          <Search size={17} strokeWidth={1.75} className="text-icon-muted" />
+          <Search size={17} strokeWidth={1.5} className="text-icon-muted" />
         </button>
       </div>
     </header>

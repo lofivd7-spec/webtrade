@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import { useLanguage } from '../context/LanguageContext';
 import { getNftListingsForCollection, getAllNftListings, type NftListingRow } from '../lib/nftCatalog';
-import { enrichNftListings, useNftReferrerPriceMap } from '../lib/nftReferrerPricing';
+import { enrichNftListings, useNftReferrerPriceMap, useNftMarketJitter } from '../lib/nftReferrerPricing';
 import { Haptic } from '../utils/haptics';
 import NftHorizontalStrip from '../components/NftHorizontalStrip';
 
@@ -34,9 +34,11 @@ const NFTCollectionGalleryPage: React.FC<NFTCollectionGalleryPageProps> = ({
   const { t } = useLanguage();
 
   const refPrices = useNftReferrerPriceMap();
+  const jitter = useNftMarketJitter();
+
   const listings = useMemo(
-    () => enrichNftListings(getNftListingsForCollection(collectionSlug), refPrices),
-    [collectionSlug, refPrices]
+    () => enrichNftListings(getNftListingsForCollection(collectionSlug), refPrices, jitter),
+    [collectionSlug, refPrices, jitter]
   );
 
   const [sort, setSort] = useState<GallerySort>('floorAsc');
@@ -241,7 +243,7 @@ const NFTCollectionGalleryPage: React.FC<NFTCollectionGalleryPageProps> = ({
       <div className={`mt-8 border-t border-white/[0.05] bg-black/10 ${GALLERY_SCROLL_BOTTOM_PADDING}`}>
         <NftHorizontalStrip 
           title={t('nft_explore_others')}
-          items={enrichNftListings(getAllNftListings().filter(n => n.collectionSlug !== collectionSlug), refPrices).slice(0, 15)}
+          items={enrichNftListings(getAllNftListings().filter(n => n.collectionSlug !== collectionSlug), refPrices, jitter).slice(0, 15)}
           onItemClick={(item) => onOpenListing(item)}
         />
       </div>

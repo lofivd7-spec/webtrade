@@ -1,31 +1,31 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --color-background: #04060a;
+  --color-background: #000000;
   --color-surface: #0a0d14;
-  --color-card: #0f121a;
-  --color-border: #131722;
-  --color-surfaceElevated: #111420;
-  --color-subtle: #06080c;
-  --color-neon: #1b8eff;
-  --color-accent: #2A7BFF;
-  --color-accentMuted: rgba(42, 123, 255, 0.06);
-  --color-up: #22c59e;
-  --color-down: #ff5b68;
-  --color-ink: #f2f7ff;
-  --color-textPrimary: #f0f5fc;
-  --color-textSecondary: #90a2b8;
-  --color-textMuted: #6b7c96;
-  --color-textSubtle: #52637a;
-  --color-textCaption: #788ba3;
+  --color-card: #11141e;
+  --color-border: #1a1f2e;
+  --color-surfaceElevated: #161a26;
+  --color-subtle: #05070a;
+  --color-neon: #2b82f6;
+  --color-accent: #1972e2;
+  --color-accentMuted: rgba(25, 114, 226, 0.1);
+  --color-up: #00d26a;
+  --color-down: #f6465d;
+  --color-ink: #ffffff;
+  --color-textPrimary: #f8fafc;
+  --color-textSecondary: #94a3b8;
+  --color-textMuted: #64748b;
+  --color-textSubtle: #475569;
+  --color-textCaption: #64748b;
   --color-hairline: #0a0d14;
-  --color-hairlineStrong: #131722;
-  --color-divider: #0f121a;
+  --color-hairlineStrong: #1e293b;
+  --color-divider: #11141e;
   --color-icon: rgba(234, 244, 255, 0.95);
   --color-icon-muted: rgba(144, 162, 184, 0.9);
   --color-icon-subtle: rgba(107, 124, 150, 0.9);
-  --font-family-sans: "Manrope", "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-family-sans: "Inter", "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-family-mono: "JetBrains Mono", "SF Mono", "Menlo", monospace;
   --radius-card: 20px;
   --radius-modal: 24px;
@@ -69,12 +69,13 @@ html {
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  background: var(--color-background);
 }
 body {
   height: 100%;
-  background: #06090e;
-  color: #f0f5fc;
-  font-family: "Manrope", "IBM Plex Sans", "Segoe UI", sans-serif;
+  background: var(--color-background);
+  color: var(--color-textPrimary);
+  font-family: "Inter", "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.45;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -547,91 +548,5 @@ button[aria-label="Назад"]:hover, button[aria-label="Back"]:hover {
   background-color: #1b2131 !important;
 }
 
-/* ==========================================================================
-   Custom High-Rounding & Solid Matte Grey Redesign Overrides
-   ========================================================================== */
 
-/* 1. Eliminate Transparent Glass Backgrounds with Solid Premium Matte Grey */
-.bg-white\/5 {
-  background-color: #121723 !important;
-}
-.bg-white\/\[0\.05\] {
-  background-color: #121723 !important;
-}
-.bg-white\/10 {
-  background-color: #1a202f !important;
-}
-.bg-white\/\[0\.03\] {
-  background-color: #0e121b !important;
-}
-.bg-white\/\[0\.02\] {
-  background-color: #0a0c13 !important;
-}
-.bg-black\/20 {
-  background-color: #080b11 !important;
-}
-.bg-black\/25 {
-  background-color: #080b11 !important;
-}
-.bg-black\/40 {
-  background-color: #06090e !important;
-}
-
-/* Active and Hover states for transparent overrides */
-.hover\:bg-white\/5:hover, .hover\:bg-white\/8:hover {
-  background-color: #1a2031 !important;
-}
-.hover\:bg-card:hover {
-  background-color: #1a202f !important;
-}
-.active\:scale-95:active, .active\:scale-\[0\.98\]:active, .active\:scale-\[0\.95\]:active, .active\:scale-\[0\.99\]:active {
-  transform: scale(0.96) !important;
-}
-
-/* 2. Universal High-Rounding for Buttons & Interactive Controls */
-.mexc-btn, .exchange-btn, button.touch-target, button.exchange-btn {
-  border-radius: 9999px !important; /* Forces a beautiful fully rounded pill shape */
-}
-
-/* 3. Highly Rounded Input Fields and Selection Dropdowns */
-input[type="text"]:not(.bg-transparent), input[type="number"]:not(.bg-transparent), input[type="password"]:not(.bg-transparent), input[type="email"]:not(.bg-transparent), input[type="numeric"]:not(.bg-transparent), select, textarea, .mexc-input, .exchange-input {
-  border-radius: 16px !important;
-  background-color: #0a0d14 !important;
-  border: 1px solid #1a202f !important;
-}
-
-/* Fully rounded search input shapes */
-.w-full.h-10.rounded-xl.bg-white\/5, .w-full.h-9.rounded-full.bg-white\/5, .w-full.h-9.rounded-full {
-  border-radius: 9999px !important;
-  background-color: #121723 !important;
-  border: 1px solid #1a202f !important;
-}
-
-/* 4. Drastically Increased Card, Panel, Modal & Widget Rounding */
-.rounded-xl {
-  border-radius: 20px !important; /* Standard card/block rounding */
-}
-.rounded-2xl {
-  border-radius: 26px !important; /* Large banners/modal rounding */
-}
-.rounded-lg {
-  border-radius: 14px !important; /* Smaller list items/indicators */
-}
-
-/* 5. Solidified Borders and Dividers (Zero Transparency) */
-.border-neutral-800, .border-neutral-700, .border-neutral-900, .border-neutral-600, .border-border, .border-white\/\[0\.06\], .border-white\/10, .border-white\/\[0\.08\] {
-  border-color: #1a202f !important;
-}
-
-.hairline-top {
-  box-shadow: inset 0 1px 0 0 #151a27 !important;
-}
-
-.hairline-bottom {
-  box-shadow: inset 0 -1px 0 0 #151a27 !important;
-}
-
-.border-t.border-white\/\[0\.025\] {
-  border-top-color: #1a202f !important;
-}
 

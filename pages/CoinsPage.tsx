@@ -6,7 +6,7 @@ import {
   type NftCollectionSummary,
   type NftListingRow,
 } from '../lib/nftCatalog';
-import { enrichNftListings, useNftReferrerPriceMap } from '../lib/nftReferrerPricing';
+import { enrichNftListings, useNftReferrerPriceMap, useNftMarketJitter } from '../lib/nftReferrerPricing';
 import { MARKET_ASSETS, STOCK_MARKET_ASSETS } from '../constants';
 import { Asset, type NavigateToTradingOptions } from '../types';
 import type { SpotHolding, StakingPosition, StakingRate } from '../types';
@@ -31,7 +31,7 @@ type NftMarketsSort = 'name' | 'floorDesc' | 'floorAsc' | 'itemsDesc' | 'notiona
 type NftMarketLayout = 'collections' | 'catalog';
 
 function marketsPickAvatarStage(asset: Asset): 'logo' | 'coincap' {
-  return (asset.category ?? 'crypto') === 'stock' && asset.logoUrl ? 'logo' : 'coincap';
+  return asset.logoUrl ? 'logo' : 'coincap';
 }
 
 function MarketsPickAvatar({ asset }: { asset: Asset }) {
@@ -64,7 +64,7 @@ function MarketsPickAvatar({ asset }: { asset: Asset }) {
       loading="lazy"
       referrerPolicy="no-referrer"
       onError={() => {
-        if (stage === 'logo' && isStock) setStage('coincap');
+        if (stage === 'logo') setStage('coincap');
         else setStage('letter');
       }}
     />
@@ -111,6 +111,8 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
 }) => {
   const { t } = useLanguage();
   const { symbol, formatPrice, rates, currencyCode } = useCurrency();
+  const refNftPrices = useNftReferrerPriceMap();
+  const jitter = useNftMarketJitter();
   const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [cryptoSort, setCryptoSort] = useState<CryptoMarketsSort>('list');
@@ -182,14 +184,13 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
     return m;
   }, [spotHoldings]);
 
-  const refNftPrices = useNftReferrerPriceMap();
   const nftCollections = useMemo<NftCollectionSummary[]>(
     () => listNftCollections(refNftPrices),
     [refNftPrices]
   );
   const nftMarketHits = useMemo(
-    () => enrichNftListings(searchNftListingsByMarketQuery(searchQuery.trim()), refNftPrices),
-    [searchQuery, refNftPrices]
+    () => enrichNftListings(searchNftListingsByMarketQuery(searchQuery.trim()), refNftPrices, jitter),
+    [searchQuery, refNftPrices, jitter]
   );
 
   const filteredNftCollections = useMemo(() => {
@@ -224,8 +225,8 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
   const catalogListingRows = useMemo(() => {
     const q = searchQuery.trim();
     const raw = q ? searchNftListingsByMarketQuery(q) : getAllNftListings();
-    return enrichNftListings(raw, refNftPrices);
-  }, [searchQuery, refNftPrices]);
+    return enrichNftListings(raw, refNftPrices, jitter);
+  }, [searchQuery, refNftPrices, jitter]);
 
   const catalogSortedListings = useMemo(() => {
     const list = [...catalogListingRows];
@@ -356,7 +357,7 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
     [liveCrypto]
   );
   const favoritesNftTopPicks = useMemo(() => {
-    const list = enrichNftListings(getAllNftListings(), refNftPrices);
+    const list = enrichNftListings(getAllNftListings(), refNftPrices, jitter);
     return [...list].sort((a, b) => b.priceEth - a.priceEth).slice(0, 10);
   }, [refNftPrices]);
 
@@ -853,8 +854,8 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
                     aria-label={`${asset.ticker} ${t('price')}`}
                   >
                     <div className="col-span-5 min-w-0 flex items-center gap-2.5">
-                      {(asset.category ?? 'crypto') === 'stock' && asset.logoUrl ? (
-                        <div className="h-11 w-11 shrink-0 rounded-xl overflow-hidden bg-black/40 ring-1 ring-white/[0.1]">
+                      {asset.logoUrl ? (
+                        <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden bg-black/40 ring-1 ring-white/[0.1]">
                           <img
                             src={asset.logoUrl}
                             alt=""

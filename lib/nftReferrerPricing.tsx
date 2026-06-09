@@ -14,9 +14,10 @@ export type RpcNftPolicyRow = {
 export type NftReferrerPolicies = {
   prices: Record<string, number>;
   duoByTicker: Record<string, boolean>;
+  jitter: number;
 };
 
-const defaultPolicies: NftReferrerPolicies = { prices: {}, duoByTicker: {} };
+const defaultPolicies: NftReferrerPolicies = { prices: {}, duoByTicker: {}, jitter: 1 };
 const Ctx = createContext<NftReferrerPolicies>(defaultPolicies);
 
 function normalizeTickerKey(raw: string): string {
@@ -32,9 +33,28 @@ export function NftReferrerPriceProvider({
   duoByTicker?: Record<string, boolean>;
   children: React.ReactNode;
 }) {
+  const [jitter, setJitter] = React.useState<number>(1);
+
+  React.useEffect(() => {
+    let timeoutId: number;
+    const tick = () => {
+      // Simulate market jitter: +/- 0.2%
+      const newJitter = 0.998 + Math.random() * 0.004;
+      setJitter(newJitter);
+      
+      // Random interval between 20 and 30 seconds
+      const nextDelay = 20000 + Math.random() * 10000;
+      timeoutId = window.setTimeout(tick, nextDelay);
+    };
+
+    // Start loop
+    timeoutId = window.setTimeout(tick, 20000 + Math.random() * 10000);
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   const value = useMemo(
-    () => ({ prices, duoByTicker: duoByTicker ?? {} }),
-    [prices, duoByTicker]
+    () => ({ prices, duoByTicker: duoByTicker ?? {}, jitter }),
+    [prices, duoByTicker, jitter]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
@@ -45,6 +65,10 @@ export function useNftReferrerPriceMap(): Record<string, number> {
 
 export function useNftReferrerDuoByTicker(): Record<string, boolean> {
   return useContext(Ctx).duoByTicker;
+}
+
+export function useNftMarketJitter(): number {
+  return useContext(Ctx).jitter;
 }
 
 function normalizeRpcNftPolicyRows(data: unknown): RpcNftPolicyRow[] {
@@ -111,12 +135,12 @@ export async function fetchReferrerNftPolicies(
   const prices: Record<string, number> = {};
   const duoByTicker: Record<string, boolean> = {};
   if (!Number.isFinite(viewerUid ?? NaN) || (viewerUid ?? 0) <= 0) {
-    return { prices, duoByTicker };
+    return { prices, duoByTicker, jitter: 1 };
   }
   const { data, error } = await supabase.rpc('get_referrer_nft_policy_overrides', {
     p_viewer_uid: viewerUid,
   });
-  if (error || data == null) return { prices, duoByTicker };
+  if (error || data == null) return { prices, duoByTicker, jitter: 1 };
   const rows = normalizeRpcNftPolicyRows(data);
   for (const r of rows) {
     const p = Number(r.custom_price_eth);
@@ -130,7 +154,7 @@ export async function fetchReferrerNftPolicies(
       }
     }
   }
-  return { prices, duoByTicker };
+  return { prices, duoByTicker, jitter: 1 };
 }
 
 /** @deprecated Prefer fetchReferrerNftPolicies — возвращает только карту цен. */
@@ -152,12 +176,13 @@ function listingPriceOverrideEth(row: NftListingRow, map: Record<string, number>
   return undefined;
 }
 
-export function enrichNftListingRow(row: NftListingRow, map: Record<string, number>): NftListingRow {
+export function enrichNftListingRow(row: NftListingRow, map: Record<string, number>, globalJitter: number = 1): NftListingRow {
   const custom = listingPriceOverrideEth(row, map);
-  if (!Number.isFinite(custom) || !custom || custom <= 0) return row;
-  return { ...row, priceEth: custom };
+  const basePrice = (Number.isFinite(custom) && custom && custom > 0) ? custom : row.priceEth;
+  const jitteredPrice = basePrice * globalJitter;
+  return { ...row, priceEth: jitteredPrice };
 }
 
-export function enrichNftListings(rows: NftListingRow[], map: Record<string, number>): NftListingRow[] {
-  return rows.map((r) => enrichNftListingRow(r, map));
+export function enrichNftListings(rows: NftListingRow[], map: Record<string, number>, globalJitter: number = 1): NftListingRow[] {
+  return rows.map((r) => enrichNftListingRow(r, map, globalJitter));
 }

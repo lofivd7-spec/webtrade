@@ -187,6 +187,22 @@ const AppContent: React.FC = () => {
   const nftDeepLinkConsumed = React.useRef(false);
   const [minLoadingDone, setMinLoadingDone] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
+      try {
+        const tg = (window as any).Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#000000');
+        tg.setBackgroundColor('#000000');
+        if (typeof tg.disableVerticalSwipes === 'function') {
+          tg.disableVerticalSwipes();
+        }
+      } catch (e) {
+        console.error('Failed to initialize Telegram WebApp', e);
+      }
+    }
+  }, []);
+
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const refId = params?.get('ref') || null;
   const bonus = params?.get('bonus') ? Number(params.get('bonus')) : null;
@@ -303,11 +319,27 @@ const AppContent: React.FC = () => {
   const [nftRefPolicies, setNftRefPolicies] = React.useState<{
     prices: Record<string, number>;
     duoByTicker: Record<string, boolean>;
-  }>({ prices: {}, duoByTicker: {} });
+    jitter: number;
+  }>({ prices: {}, duoByTicker: {}, jitter: 1 });
 
   useEffect(() => {
-    void refreshNftListingsFromSupabase();
-  }, []);
+    let interval: number;
+
+    const fetchAllNftData = async () => {
+      await refreshNftListingsFromSupabase();
+      if (user?.user_id) {
+        const p = await fetchReferrerNftPolicies(user.user_id);
+        setNftRefPolicies(p);
+      } else {
+        setNftRefPolicies({ prices: {}, duoByTicker: {}, jitter: 1 });
+      }
+    };
+
+    void fetchAllNftData();
+    interval = window.setInterval(fetchAllNftData, 15000);
+
+    return () => window.clearInterval(interval);
+  }, [user?.user_id, user?.referrer_id]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || nftDeepLinkConsumed.current) return;
@@ -325,17 +357,6 @@ const AppContent: React.FC = () => {
       /* ignore malformed query */
     }
   }, [loading, navigateTo]);
-
-  useEffect(() => {
-    if (!user?.user_id) {
-      setNftRefPolicies({ prices: {}, duoByTicker: {} });
-      return;
-    }
-    void (async () => {
-      const p = await fetchReferrerNftPolicies(user.user_id);
-      setNftRefPolicies(p);
-    })();
-  }, [user?.user_id, user?.referrer_id]);
 
 
 

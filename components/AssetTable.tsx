@@ -83,23 +83,29 @@ const AssetTable: React.FC<AssetTableProps> = ({
             key={asset.id}
             onClick={() => { Haptic.tap(); onAssetClick?.(asset); }}
             className={[
-              'grid grid-cols-12 gap-1 items-center min-h-[56px] py-2.5 px-2.5 cursor-pointer group transition-all duration-150 active:scale-[0.99]',
+              'grid grid-cols-12 gap-1 items-center min-h-[44px] py-1.5 px-2 cursor-pointer group transition-all duration-150 active:scale-[0.99]',
               variant === 'minimal'
                 ? [
                     'rounded-none',
                     'bg-transparent hover:bg-white/[0.03]',
                     'focus:outline-none',
-                    // без “рамок”/обводок: вместо карточек — ровный список с тонким разделителем
                     idx === sortedAssets.length - 1 ? '' : 'hairline-bottom',
                   ].join(' ')
-                : 'rounded-lg bg-card hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/30',
+                : 'rounded-md bg-transparent hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/30 hairline-bottom',
             ].join(' ')}
           >
-            <div className="col-span-5 flex flex-col min-w-0 gap-0.5">
-              <span className="text-[15px] font-normal text-white group-hover:text-neon transition-etoro truncate">
-                {asset.ticker}
-              </span>
-              <span className="text-[12px] text-textSecondary truncate">{asset.name}</span>
+            <div className="col-span-5 flex items-center gap-2 min-w-0">
+              {asset.logoUrl ? (
+                <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden bg-black/40 ring-1 ring-white/[0.1]">
+                  <img src={asset.logoUrl} alt="" className="h-full w-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                </div>
+              ) : null}
+              <div className="flex flex-col min-w-0 gap-0">
+                <span className="text-[14px] font-medium text-textPrimary group-hover:text-neon transition-etoro truncate">
+                  {asset.ticker}
+                </span>
+                <span className="text-[12px] text-textSecondary truncate">{asset.name}</span>
+              </div>
             </div>
             <div className="col-span-3 flex flex-col items-end justify-center gap-0.5">
               <span className="text-xs font-mono font-medium text-textPrimary tabular-nums">

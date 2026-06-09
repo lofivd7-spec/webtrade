@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { fetchAssetPricesInUsd } from '../lib/cryptoPrices';
 import { getNftListingsForCollection, nftListingToAsset, nftTickerForListing, type NftListingRow } from '../lib/nftCatalog';
-import { enrichNftListingRow, useNftReferrerPriceMap } from '../lib/nftReferrerPricing';
+import { enrichNftListingRow, useNftReferrerPriceMap, useNftMarketJitter } from '../lib/nftReferrerPricing';
 import { withNftDisplayWobbleUsd } from '../utils/nftPriceWobble';
 import type { Asset } from '../types';
 import { Haptic } from '../utils/haptics';
@@ -42,7 +42,9 @@ const NFTDetailPage: React.FC<NFTDetailPageProps> = ({ listing, onBack, onTrade 
   const { formatPrice, currencyCode } = useCurrency();
   const refPrices = useNftReferrerPriceMap();
   const [display, setDisplay] = useState(listing);
-  const pricedRow = useMemo(() => enrichNftListingRow(display, refPrices), [display, refPrices]);
+  const jitter = useNftMarketJitter();
+
+  const pricedRow = useMemo(() => enrichNftListingRow(display, refPrices, jitter), [display, refPrices, jitter]);
 
   useEffect(() => {
     setDisplay(listing);

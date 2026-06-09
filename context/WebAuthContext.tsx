@@ -107,7 +107,6 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
         email: normalizedEmail,
         password,
         options: {
-          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
           data: {
             full_name: fullName.trim(),
             ref_code: normalizedRefCode || null,

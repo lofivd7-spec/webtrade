@@ -337,7 +337,6 @@ function ChartEmbed(props: {
         src={embed.src}
         scrolling="no"
         loading="lazy"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         onLoad={() => setChartLoaded(true)}
       />
     );

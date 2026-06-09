@@ -18,7 +18,7 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
 }) => {
   return (
     <div
-      className="fixed inset-0 z-[300] bg-background text-textPrimary overflow-hidden"
+      className="fixed inset-0 z-[300] bg-background text-textPrimary overflow-y-auto overflow-x-hidden"
       style={{
         paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -30,7 +30,7 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
         <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] bg-[#1b8eff]/[0.04] blur-[100px] rounded-full" />
       </div>
 
-      <div className="h-full w-full lg:grid lg:grid-cols-2">
+      <div className="min-h-full w-full lg:grid lg:grid-cols-2">
         {/* LEFT: Hero (desktop only) — clean, minimal */}
         <aside className="hidden lg:flex relative overflow-hidden bg-gradient-to-br from-[#060a12] via-[#080d1a] to-[#0a1020] border-r border-border/40">
           <div className="absolute inset-0 pointer-events-none" aria-hidden>
@@ -77,7 +77,7 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
         </aside>
 
         {/* RIGHT: Form */}
-        <section className="relative flex flex-col h-full">
+        <section className="relative flex flex-col min-h-full">
           {/* Header */}
           <header className="relative shrink-0 flex items-center gap-3 px-5 py-4">
             <button
@@ -107,7 +107,7 @@ const AuthFullScreenLayout: React.FC<AuthFullScreenLayoutProps> = ({
             </div>
           )}
 
-          <div className="relative flex-1 min-h-0 overflow-y-auto no-scrollbar scroll-app px-5 pb-10 pt-4">
+          <div className="relative flex-1 px-5 pb-10 pt-4">
             <div className="max-w-sm mx-auto w-full">
               {children}
             </div>

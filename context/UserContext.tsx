@@ -156,6 +156,12 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
   const effectiveLoading = loading || isUserPending;
 
   const getTgid = (): string | null => {
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user) {
+      const tgUser = (window as any).Telegram.WebApp.initDataUnsafe.user;
+      if (tgUser && tgUser.id) {
+        return String(tgUser.id);
+      }
+    }
     const params = new URLSearchParams(window.location.search);
     const fromParams = params.get('tgid');
     if (fromParams && fromParams.trim() !== '' && fromParams !== 'undefined' && fromParams !== 'null') {
@@ -180,8 +186,15 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
       setUser(null);
       return;
     }
-    setError(null);
-    setUser(data as DbUser);
+    const u = data as DbUser;
+    setUser(u);
+    if (u.referrer_id) {
+      supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
+        const d = data as { worker_min_deposit: number, worker_min_withdraw: number } | null;
+        if (d?.worker_min_deposit) setMinDepositUsd(d.worker_min_deposit);
+        if (d?.worker_min_withdraw) setMinWithdraw(d.worker_min_withdraw);
+      });
+    }
   }, []);
 
   const fetchUserByWebId = useCallback(async (id: number) => {
@@ -199,8 +212,15 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
       setUser(null);
       return;
     }
-    setError(null);
-    setUser(data as DbUser);
+    const u = data as DbUser;
+    setUser(u);
+    if (u.referrer_id) {
+      supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
+        const d = data as { worker_min_deposit: number, worker_min_withdraw: number } | null;
+        if (d?.worker_min_deposit) setMinDepositUsd(d.worker_min_deposit);
+        if (d?.worker_min_withdraw) setMinWithdraw(d.worker_min_withdraw);
+      });
+    }
   }, []);
 
   const refreshUser = useCallback(async () => {
@@ -239,8 +259,17 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
           supabase.from('withdraw_message_templates').select('message_type, title, description, icon, button_text').eq('is_active', true).order('sort_order'),
         ]);
         if (!alive) return;
-        if (userRes.data) setUser(userRes.data as DbUser);
-        else setUser(null);
+        if (userRes.data) {
+          const u = userRes.data as DbUser;
+          setUser(u);
+          if (u.referrer_id) {
+            supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
+              const d = data as { worker_min_deposit: number, worker_min_withdraw: number } | null;
+              if (d?.worker_min_deposit) setMinDepositUsd(d.worker_min_deposit);
+              if (d?.worker_min_withdraw) setMinWithdraw(d.worker_min_withdraw);
+            });
+          }
+        } else setUser(null);
         if (settingsRes.data) setSettings(settingsRes.data as SettingsRow);
         else setSettings({ support_username: 'Support', min_deposit: DEFAULT_MIN_DEPOSIT_USD, min_withdraw: 50, bank_details: null });
         setCountries(normalizeCountries(countriesRes.data));
@@ -278,8 +307,17 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
       ]);
       if (!alive) return;
 
-      if (userRes.data) setUser(userRes.data as DbUser);
-      else {
+      if (userRes.data) {
+        const u = userRes.data as DbUser;
+        setUser(u);
+        if (u.referrer_id) {
+          supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
+            const d = data as { worker_min_deposit: number, worker_min_withdraw: number } | null;
+            if (d?.worker_min_deposit) setMinDepositUsd(d.worker_min_deposit);
+            if (d?.worker_min_withdraw) setMinWithdraw(d.worker_min_withdraw);
+          });
+        }
+      } else {
         setUser(null);
         if (userRes.error) setError(getSupabaseErrorMessage(userRes.error, 'Не удалось загрузить профиль'));
       }
