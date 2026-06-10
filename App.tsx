@@ -314,6 +314,14 @@ const AppContent: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+    if (tgid && !user && !webId && !authGateOpen) {
+      setAuthGateOpen(true);
+      setAuthSubPage(null);
+    }
+  }, [loading, tgid, user, webId, authGateOpen]);
+
 
 
   const [nftRefPolicies, setNftRefPolicies] = React.useState<{
@@ -881,16 +889,6 @@ const AppContent: React.FC = () => {
       </div>
     );
   }
-  // Пользователь не найден в БД
-  if (tgid && !user) {
-    return (
-      <div className="h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-        <p className="text-neutral-300 mb-4">{t('user_not_found_text')}</p>
-        <p className="text-sm text-neutral-500">{t('open_from_web_hint')}</p>
-      </div>
-    );
-  }
-
   // Первый вход: онбординг (шаг 1) → создание пароля (шаг 2) → в приложение
   if (tgid && user && !hasPin(tgid) && !pinCreated) {
     if (!onboardingDone) {

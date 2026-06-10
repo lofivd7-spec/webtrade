@@ -27,6 +27,7 @@ import { useHideOnScroll } from '../utils/useHideOnScroll';
 import { supabase } from '../lib/supabase';
 import BottomSheet from '../components/BottomSheet';
 import CryptoBannerWidget from '../components/CryptoBannerWidget';
+import UserAvatar from '../components/UserAvatar';
 
 interface HomePageProps {
     balance: number;
@@ -111,11 +112,15 @@ const HomePage: React.FC<HomePageProps> = ({ balance, balanceLoading = false, us
             className="touch-target h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
             aria-label={t('profile')}
           >
-            {user?.photo_url ? (
-              <img src={user.photo_url} alt="" className="h-6.5 w-6.5 rounded-full object-cover" />
-            ) : (
-              <User size={18} className="text-textSecondary" />
-            )}
+            <UserAvatar
+              name={user?.full_name || user?.username || user?.email || t('profile')}
+              photoUrl={user?.photo_url}
+              className="h-6.5 w-6.5"
+              imageClassName="border-neutral-700"
+              fallbackClassName="bg-neutral-800 border-neutral-700 text-textSecondary text-[10px]"
+              iconClassName="text-textSecondary"
+              iconSize={12}
+            />
           </button>
 
           <div className="flex-1 min-w-0">

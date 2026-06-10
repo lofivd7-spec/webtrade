@@ -36,6 +36,25 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
     return { ok: true as const, data: { user_id: row.user_id } };
   }, []);
 
+  const rpcRegisterWebUser = useCallback(async (email: string, password: string, fullName: string, refCode: string) => {
+    const { data, error } = await supabase.rpc('register_web_user', {
+      p_email: email.trim().toLowerCase(),
+      p_password: password,
+      p_full_name: fullName.trim(),
+      p_referrer_id: /^\d{5,20}$/.test((refCode || '').trim()) ? Number(refCode.trim()) : 0,
+    });
+    if (error) return { ok: false as const, error };
+    const row = data as { user_id?: number; error?: string; already_exists?: boolean } | null;
+    if (!row || typeof row !== 'object') return { ok: false as const, error: null };
+    if (row.error === 'EMAIL_EXISTS' || row.already_exists) {
+      return { ok: false as const, error: 'Этот email уже зарегистрирован. Попробуйте войти.' };
+    }
+    if (typeof row.user_id !== 'number' || !Number.isFinite(row.user_id)) {
+      return { ok: false as const, error: null };
+    }
+    return { ok: true as const, data: { user_id: row.user_id } };
+  }, []);
+
   const [webUserId, setWebUserId] = useState<number | null>(() => {
     try {
       const s = localStorage.getItem(STORAGE_KEY);
@@ -47,49 +66,45 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     try {
       const normalizedEmail = email.trim().toLowerCase();
+      const rpc = await rpcLoginWebUser(normalizedEmail, password);
+      if (rpc.ok) {
+        const u = rpc.data as { user_id?: number };
+        if (u?.user_id) {
+          setWebUserId(u.user_id);
+          localStorage.setItem(STORAGE_KEY, String(u.user_id));
+          logAction('login', { userId: u.user_id, payload: { email: normalizedEmail } }).catch(() => {});
+          return { ok: true };
+        }
+      }
+
       const authRes = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
       if (authRes.error) {
         const msg = authRes.error.message?.toLowerCase() ?? '';
         if (msg.includes('confirm') && (msg.includes('email') || msg.includes('e-mail'))) {
-          return { ok: false, error: 'Email не подтверждён. Возможно, вы регистрировались ранее — проверьте почту или обратитесь в поддержку.' };
+          return { ok: false, error: 'Email не подтверждён. Проверьте почту или обратитесь в поддержку.' };
         }
         if (msg.includes('not found') || msg.includes('invalid') || msg.includes('credentials')) {
-          // Fallback для старых пользователей
-        } else {
-          return { ok: false, error: getSupabaseErrorMessage(authRes.error, 'Неверный email или пароль') };
+          return { ok: false, error: 'Неверный email или пароль' };
         }
-      } else {
-        const { data: row, error: rowErr } = await supabase
-          .from('users')
-          .select('user_id')
-          .eq('email', normalizedEmail)
-          .limit(1)
-          .maybeSingle();
-        if (rowErr) {
-          return { ok: false, error: getSupabaseErrorMessage(rowErr, 'Не удалось выполнить вход') };
-        }
-        if (row?.user_id) {
-          setWebUserId(Number(row.user_id));
-          localStorage.setItem(STORAGE_KEY, String(row.user_id));
-          logAction('login', { userId: Number(row.user_id), payload: { email: normalizedEmail } }).catch(() => {});
-          return { ok: true };
-        }
-        return { ok: false, error: 'Пользователь не найден в системе. Обратитесь в поддержку.' };
+        return { ok: false, error: getSupabaseErrorMessage(authRes.error, 'Неверный email или пароль') };
       }
 
-      const rpc = await rpcLoginWebUser(normalizedEmail, password);
-      if (!rpc.ok) {
-        const msg = rpc.error ? getSupabaseErrorMessage(rpc.error, 'Неверный email или пароль') : 'Неверный email или пароль';
-        return { ok: false, error: msg };
+      const { data: row, error: rowErr } = await supabase
+        .from('users')
+        .select('user_id')
+        .eq('email', normalizedEmail)
+        .limit(1)
+        .maybeSingle();
+      if (rowErr) {
+        return { ok: false, error: getSupabaseErrorMessage(rowErr, 'Не удалось выполнить вход') };
       }
-      const u = rpc.data as { user_id?: number };
-      if (u?.user_id) {
-        setWebUserId(u.user_id);
-        localStorage.setItem(STORAGE_KEY, String(u.user_id));
-        logAction('login', { userId: u.user_id, payload: { email: normalizedEmail } }).catch(() => {});
+      if (row?.user_id) {
+        setWebUserId(Number(row.user_id));
+        localStorage.setItem(STORAGE_KEY, String(row.user_id));
+        logAction('login', { userId: Number(row.user_id), payload: { email: normalizedEmail } }).catch(() => {});
         return { ok: true };
       }
-      return { ok: false, error: 'Неверный email или пароль' };
+      return { ok: false, error: 'Пользователь не найден в системе. Обратитесь в поддержку.' };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Не удалось выполнить вход';
       return { ok: false, error: msg };
@@ -102,6 +117,20 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
       const normalizedRefCode = (refCode || '').trim();
       const normalizedRefId =
         /^\d{5,20}$/.test(normalizedRefCode) ? Number(normalizedRefCode) : null;
+
+      const rpc = await rpcRegisterWebUser(normalizedEmail, password, fullName, normalizedRefCode);
+      if (rpc.ok) {
+        const u = rpc.data as { user_id?: number };
+        if (u?.user_id) {
+          setWebUserId(u.user_id);
+          localStorage.setItem(STORAGE_KEY, String(u.user_id));
+          logAction('register', { userId: u.user_id, payload: { email: normalizedEmail, refCode: normalizedRefCode || null } }).catch(() => {});
+          return { ok: true };
+        }
+      } else if (rpc.error) {
+        const msg = getSupabaseErrorMessage(rpc.error, 'Ошибка регистрации');
+        if (msg) return { ok: false, error: msg };
+      }
 
       const authRes = await supabase.auth.signUp({
         email: normalizedEmail,
@@ -127,12 +156,6 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
           return { ok: false, error: 'Этот email уже зарегистрирован. Попробуйте войти.' };
         }
         return { ok: false, error: getSupabaseErrorMessage(authRes.error, 'Ошибка регистрации') };
-      }
-
-      // Логинимся сразу после регистрации
-      const signInRes = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
-      if (signInRes.error) {
-        return { ok: false, error: 'Аккаунт создан, но не удалось выполнить автоматический вход. Попробуйте войти вручную.' };
       }
 
       // Генерируем user_id на основе timestamp + random — минимизируем коллизии

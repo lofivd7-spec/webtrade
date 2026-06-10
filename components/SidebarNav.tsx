@@ -8,6 +8,7 @@ import { useWebAuth } from '../context/WebAuthContext';
 import Skeleton from './Skeleton';
 import { NavHomeIcon, NavMarketsIcon, NavTradeIcon, NavWalletIcon } from './icons/MexcNavIcons';
 import UnifiedMarketsRibbon from './UnifiedMarketsRibbon';
+import UserAvatar from './UserAvatar';
 
 interface SidebarNavProps {
   currentPage: PageView;
@@ -53,9 +54,15 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ currentPage, onNavigate }) => {
         {user ? (
           <div className="px-3 pb-4 mb-2 border-b border-border/40">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-neon text-sm font-semibold shrink-0">
-                {(displayName || '?').charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar
+                name={displayName}
+                photoUrl={user.photo_url}
+                className="w-8 h-8"
+                imageClassName="border-border"
+                fallbackClassName="bg-card border-border text-neon text-sm"
+                iconClassName="text-neon"
+                iconSize={12}
+              />
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-textPrimary truncate">{displayName}</p>
                 {user.email && isWebUser && (

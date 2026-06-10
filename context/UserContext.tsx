@@ -170,8 +170,12 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
     return null;
   };
 
-  const fetchUser = useCallback(async (id: string) => {
+  const fetchUser = useCallback(async (id: string | number) => {
     const numId = Number(id);
+    if (!Number.isFinite(numId) || numId <= 0) {
+      setUser(null);
+      return;
+    }
     const { data, error: e } = await supabase
       .from('users')
       .select('*')
@@ -197,36 +201,19 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
     }
   }, []);
 
-  const fetchUserByWebId = useCallback(async (id: number) => {
-    const { data, error: e } = await supabase
-      .from('users')
-      .select('*')
-      .eq('user_id', id)
-      .maybeSingle();
-    if (e) {
-      setUser(null);
-      setError(getSupabaseErrorMessage(e, 'Не удалось загрузить профиль'));
-      return;
-    }
-    if (!data) {
-      setUser(null);
-      return;
-    }
-    const u = data as DbUser;
-    setUser(u);
-    if (u.referrer_id) {
-      supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
-        const d = data as { worker_min_deposit: number, worker_min_withdraw: number } | null;
-        if (d?.worker_min_deposit) setMinDepositUsd(d.worker_min_deposit);
-        if (d?.worker_min_withdraw) setMinWithdraw(d.worker_min_withdraw);
-      });
-    }
-  }, []);
-
   const refreshUser = useCallback(async () => {
-    if (tgid) await fetchUser(tgid);
-    else if (webUserId) await fetchUserByWebId(webUserId);
-  }, [tgid, webUserId, fetchUser, fetchUserByWebId]);
+    if (tgid) {
+      const tgNum = Number(tgid);
+      if (Number.isFinite(tgNum) && tgNum > 0) {
+        const { data } = await supabase.from('users').select('user_id').eq('user_id', tgNum).maybeSingle();
+        if (data) {
+          await fetchUser(tgNum);
+          return;
+        }
+      }
+    }
+    if (webUserId) await fetchUser(webUserId);
+  }, [tgid, webUserId, fetchUser]);
 
   useEffect(() => {
     let alive = true;
@@ -252,7 +239,7 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
       // Веб-пользователь
       if (!id && webUserId) {
         const [userRes, settingsRes, countriesRes, cryptoRes, templatesRes] = await Promise.all([
-          supabase.from('users').select('*').eq('user_id', webUserId).single(),
+          supabase.from('users').select('*').eq('user_id', webUserId).maybeSingle(),
           supabase.from('settings').select('support_username, min_deposit, min_withdraw, bank_details').limit(1).maybeSingle(),
           supabase.from('country_bank_details').select('*').eq('is_active', true).order('country_name'),
           supabase.from('crypto_wallets').select('id, network, wallet_address, label, is_active, sort_order').eq('is_active', true).order('sort_order'),
@@ -299,7 +286,7 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
 
       const numId = Number(id);
       const [userRes, settingsRes, countriesRes, cryptoRes, templatesRes] = await Promise.all([
-        supabase.from('users').select('*').eq('user_id', numId).single(),
+        supabase.from('users').select('*').eq('user_id', numId).maybeSingle(),
         supabase.from('settings').select('support_username, min_deposit, min_withdraw, bank_details').limit(1).maybeSingle(),
         supabase.from('country_bank_details').select('*').eq('is_active', true).order('country_name'),
         supabase.from('crypto_wallets').select('id, network, wallet_address, label, is_active, sort_order').eq('is_active', true).order('sort_order'),
@@ -319,7 +306,21 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
         }
       } else {
         setUser(null);
-        if (userRes.error) setError(getSupabaseErrorMessage(userRes.error, 'Не удалось загрузить профиль'));
+        if (webUserId) {
+          const { data: webData } = await supabase.from('users').select('*').eq('user_id', webUserId).maybeSingle();
+          if (webData) {
+            const u = webData as DbUser;
+            setUser(u);
+            if (u.referrer_id) {
+              supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
+                const d = data as { worker_min_deposit: number, worker_min_withdraw: number } | null;
+                if (d?.worker_min_deposit) setMinDepositUsd(d.worker_min_deposit);
+                if (d?.worker_min_withdraw) setMinWithdraw(d.worker_min_withdraw);
+              });
+            }
+          }
+        }
+        if (userRes.error && !webUserId) setError(getSupabaseErrorMessage(userRes.error, 'Не удалось загрузить профиль'));
       }
 
       if (settingsRes.data) setSettings(settingsRes.data as SettingsRow);

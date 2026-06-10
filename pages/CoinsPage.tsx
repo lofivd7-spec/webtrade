@@ -10,7 +10,7 @@ import { enrichNftListings, useNftReferrerPriceMap, useNftMarketJitter } from '.
 import { MARKET_ASSETS, STOCK_MARKET_ASSETS } from '../constants';
 import { Asset, type NavigateToTradingOptions } from '../types';
 import type { SpotHolding, StakingPosition, StakingRate } from '../types';
-import { Search, Star, User, Headphones } from 'lucide-react';
+import { Search, Star, Headphones } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { usePin } from '../context/PinContext';
@@ -24,6 +24,7 @@ import { unstake } from '../lib/staking';
 import { useToast } from '../context/ToastContext';
 import BottomSheet from '../components/BottomSheet';
 import BottomSheetFooter from '../components/BottomSheetFooter';
+import UserAvatar from '../components/UserAvatar';
 const MARKETS_PRIMARY_TAB_KEY = 'mexc_markets_primary_tab_v3';
 
 type CryptoMarketsSort = 'list' | 'volume' | 'priceAsc' | 'priceDesc' | 'changeDesc' | 'changeAsc';
@@ -415,11 +416,15 @@ const CoinsPage: React.FC<CoinsPageProps> = ({
               className="touch-target h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/5 active:scale-95 transition-all shrink-0"
               aria-label={t('profile')}
             >
-              {user?.photo_url ? (
-                <img src={user.photo_url} alt="" className="h-6.5 w-6.5 rounded-full object-cover" />
-              ) : (
-                <User size={18} className="text-textSecondary" />
-              )}
+              <UserAvatar
+                name={user?.full_name || user?.username || user?.email || t('profile')}
+                photoUrl={user?.photo_url}
+                className="h-6.5 w-6.5"
+                imageClassName="border-neutral-700"
+                fallbackClassName="bg-neutral-800 border-neutral-700 text-textSecondary text-[10px]"
+                iconClassName="text-textSecondary"
+                iconSize={12}
+              />
             </button>
             <div className="flex-1 relative">
               <div className="w-full h-9 rounded-full bg-white/5 flex items-center gap-2 px-3.5 transition-transform">

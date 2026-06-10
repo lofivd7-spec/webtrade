@@ -1,10 +1,11 @@
 import React from 'react';
-import { Search, User } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import type { DbUser } from '../context/UserContext';
 import { Haptic } from '../utils/haptics';
 import { useCurrency } from '../context/CurrencyContext';
 import { APP_TOP_BAR_CLASS, APP_TOP_BAR_ROW, APP_TOP_BAR_STYLE } from './appTopBar';
+import UserAvatar from './UserAvatar';
 
 interface HomeHeaderProps {
   showBalanceTitle: boolean;
@@ -27,17 +28,15 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ showBalanceTitle: _showBalanceT
           onClick={() => { Haptic.tap(); onProfileClick?.(); }}
           className="touch-target flex items-center gap-2 min-w-0 px-2 py-1 rounded-full hover:bg-card active:scale-[0.97] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-neon/30 min-h-[44px]"
         >
-          {user?.photo_url ? (
-            <img
-              src={user.photo_url}
-              alt=""
-              className="h-7 w-7 rounded-full border border-neutral-700 object-cover flex-shrink-0"
-            />
-          ) : (
-            <div className="h-7 w-7 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neon flex-shrink-0">
-              <User size={14} />
-            </div>
-          )}
+          <UserAvatar
+            name={user?.full_name || user?.username || user?.email || t('profile')}
+            photoUrl={user?.photo_url}
+            className="h-7 w-7"
+            imageClassName="border-neutral-700"
+            fallbackClassName="bg-neutral-800 border-neutral-700 text-neon text-[10px]"
+            iconClassName="text-neon"
+            iconSize={14}
+          />
           <div className="hidden xs:flex flex-col items-start leading-tight gap-0">
             <span className="text-[10px] font-semibold text-textMuted uppercase tracking-wider">
               {t('sellbit')}
