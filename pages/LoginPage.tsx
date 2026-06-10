@@ -27,6 +27,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess, onGoRegister, 
   const { login, resendEmailConfirmation } = useWebAuth();
   const toast = useToast();
   const { t } = useLanguage();
+  const isMiniApp = typeof window !== 'undefined' && !!(window as any).Telegram?.WebApp?.initDataUnsafe?.user;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,7 +75,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess, onGoRegister, 
 
   return (
     <>
-      <AuthFullScreenLayout onBack={onBack} title={t('login_title')} subtitle={t('login_subtitle')}>
+      <AuthFullScreenLayout
+        onBack={onBack}
+        title={t('login_title')}
+        subtitle={isMiniApp ? 'Введите email и пароль для входа' : 'Войдите по email и паролю'}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-textMuted mb-1.5 tracking-wide">Email</label>

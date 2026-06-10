@@ -207,7 +207,9 @@ const AppContent: React.FC = () => {
   const refId = params?.get('ref') || null;
   const bonus = params?.get('bonus') ? Number(params.get('bonus')) : null;
   const openSupport = params?.get('open') === 'support';
-  const isLoggedIn = Boolean((tgid || webId) && user);
+  const hasMiniAppEmailAccess = Boolean(tgid && user?.email);
+  const hasWebAccess = Boolean(webId && user);
+  const isLoggedIn = hasMiniAppEmailAccess || hasWebAccess;
 
   const PROTECTED_PAGES: PageView[] = [
     'DEPOSIT',
@@ -316,7 +318,7 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (tgid && !user && !webId && !authGateOpen) {
+    if (tgid && (!user || !user.email) && !webId && !authGateOpen) {
       setAuthGateOpen(true);
       setAuthSubPage(null);
     }

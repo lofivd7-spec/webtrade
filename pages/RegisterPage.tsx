@@ -40,6 +40,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
   const { register } = useWebAuth();
   const toast = useToast();
   const { t } = useLanguage();
+  const isMiniApp = typeof window !== 'undefined' && !!(window as any).Telegram?.WebApp?.initDataUnsafe?.user;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -100,7 +101,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ refId, bonus, onBack, onSuc
 
   return (
     <>
-      <AuthFullScreenLayout onBack={onBack} title={t('auth_register_title')} subtitle={t('auth_register_subtitle')}>
+      <AuthFullScreenLayout
+        onBack={onBack}
+        title={t('auth_register_title')}
+        subtitle={isMiniApp ? 'Создайте аккаунт по email и паролю' : 'Укажите email и пароль для нового аккаунта'}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-textMuted mb-1.5 tracking-wide">Email</label>

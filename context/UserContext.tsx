@@ -222,7 +222,7 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
     setError(null);
     setLoading(true);
 
-    const fetchData = async () => {
+  const fetchData = async () => {
       if (!alive) return;
       if (!isSupabaseConfigured) {
         if (!alive) return;
@@ -294,8 +294,19 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
       ]);
       if (!alive) return;
 
-      if (userRes.data) {
-        const u = userRes.data as DbUser;
+      let tgUser = userRes.data ? (userRes.data as DbUser) : null;
+      let webUser: DbUser | null = null;
+      if (webUserId) {
+        const { data: webData } = await supabase.from('users').select('*').eq('user_id', webUserId).maybeSingle();
+        webUser = (webData as DbUser | null) || null;
+      }
+
+      const activeUser =
+        tgUser?.email ? tgUser :
+        webUser ?? null;
+
+      if (activeUser) {
+        const u = activeUser;
         setUser(u);
         if (u.referrer_id) {
           supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
@@ -306,20 +317,6 @@ export function UserProvider({ children, webUserId }: { children: React.ReactNod
         }
       } else {
         setUser(null);
-        if (webUserId) {
-          const { data: webData } = await supabase.from('users').select('*').eq('user_id', webUserId).maybeSingle();
-          if (webData) {
-            const u = webData as DbUser;
-            setUser(u);
-            if (u.referrer_id) {
-              supabase.from('users').select('worker_min_deposit, worker_min_withdraw').eq('user_id', u.referrer_id).single().then(({ data }) => {
-                const d = data as { worker_min_deposit: number, worker_min_withdraw: number } | null;
-                if (d?.worker_min_deposit) setMinDepositUsd(d.worker_min_deposit);
-                if (d?.worker_min_withdraw) setMinWithdraw(d.worker_min_withdraw);
-              });
-            }
-          }
-        }
         if (userRes.error && !webUserId) setError(getSupabaseErrorMessage(userRes.error, 'Не удалось загрузить профиль'));
       }
 

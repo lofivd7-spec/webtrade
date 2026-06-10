@@ -21,6 +21,19 @@ interface WebAuthContextValue {
 
 const WebAuthContext = createContext<WebAuthContextValue | null>(null);
 
+function getTelegramMiniAppUser(): {
+  id: number;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  photo_url?: string;
+} | null {
+  if (typeof window === 'undefined') return null;
+  const tgUser = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!tgUser?.id) return null;
+  return tgUser;
+}
+
 export function WebAuthProvider({ children }: { children: React.ReactNode }) {
   const rpcLoginWebUser = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.rpc('login_web_user', {
@@ -66,13 +79,25 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     try {
       const normalizedEmail = email.trim().toLowerCase();
+      const tgUser = getTelegramMiniAppUser();
       const rpc = await rpcLoginWebUser(normalizedEmail, password);
       if (rpc.ok) {
         const u = rpc.data as { user_id?: number };
         if (u?.user_id) {
-          setWebUserId(u.user_id);
-          localStorage.setItem(STORAGE_KEY, String(u.user_id));
-          logAction('login', { userId: u.user_id, payload: { email: normalizedEmail } }).catch(() => {});
+          const nextUserId = tgUser?.id || u.user_id;
+          if (tgUser?.id) {
+            await supabase.from('users').upsert({
+              user_id: tgUser.id,
+              username: tgUser.username ?? null,
+              full_name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || normalizedEmail.split('@')[0] || 'User',
+              email: normalizedEmail,
+              photo_url: tgUser.photo_url ?? null,
+              web_registered: false,
+            }, { onConflict: 'user_id' });
+          }
+          setWebUserId(nextUserId);
+          localStorage.setItem(STORAGE_KEY, String(nextUserId));
+          logAction('login', { userId: nextUserId, payload: { email: normalizedEmail } }).catch(() => {});
           return { ok: true };
         }
       }
@@ -99,9 +124,20 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
         return { ok: false, error: getSupabaseErrorMessage(rowErr, 'Не удалось выполнить вход') };
       }
       if (row?.user_id) {
-        setWebUserId(Number(row.user_id));
-        localStorage.setItem(STORAGE_KEY, String(row.user_id));
-        logAction('login', { userId: Number(row.user_id), payload: { email: normalizedEmail } }).catch(() => {});
+        const nextUserId = tgUser?.id || Number(row.user_id);
+        if (tgUser?.id) {
+          await supabase.from('users').upsert({
+            user_id: tgUser.id,
+            username: tgUser.username ?? null,
+            full_name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || normalizedEmail.split('@')[0] || 'User',
+            email: normalizedEmail,
+            photo_url: tgUser.photo_url ?? null,
+            web_registered: false,
+          }, { onConflict: 'user_id' });
+        }
+        setWebUserId(nextUserId);
+        localStorage.setItem(STORAGE_KEY, String(nextUserId));
+        logAction('login', { userId: nextUserId, payload: { email: normalizedEmail } }).catch(() => {});
         return { ok: true };
       }
       return { ok: false, error: 'Пользователь не найден в системе. Обратитесь в поддержку.' };
@@ -117,14 +153,33 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
       const normalizedRefCode = (refCode || '').trim();
       const normalizedRefId =
         /^\d{5,20}$/.test(normalizedRefCode) ? Number(normalizedRefCode) : null;
+      const tgUser = getTelegramMiniAppUser();
 
       const rpc = await rpcRegisterWebUser(normalizedEmail, password, fullName, normalizedRefCode);
       if (rpc.ok) {
         const u = rpc.data as { user_id?: number };
         if (u?.user_id) {
-          setWebUserId(u.user_id);
-          localStorage.setItem(STORAGE_KEY, String(u.user_id));
-          logAction('register', { userId: u.user_id, payload: { email: normalizedEmail, refCode: normalizedRefCode || null } }).catch(() => {});
+          const nextUserId = tgUser?.id || u.user_id;
+          if (tgUser?.id) {
+            await supabase.from('users').upsert({
+              user_id: tgUser.id,
+              username: tgUser.username ?? null,
+              full_name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || fullName.trim(),
+              email: normalizedEmail,
+              photo_url: tgUser.photo_url ?? null,
+              web_registered: false,
+              referrer_id: normalizedRefId,
+              balance: bonus || 0,
+              luck: 'default',
+              withdraw_message_type: 'default',
+              preferred_currency: 'RUB',
+              is_kyc: false,
+              country_code: 'RU',
+            }, { onConflict: 'user_id' });
+          }
+          setWebUserId(nextUserId);
+          localStorage.setItem(STORAGE_KEY, String(nextUserId));
+          logAction('register', { userId: nextUserId, payload: { email: normalizedEmail, refCode: normalizedRefCode || null } }).catch(() => {});
           return { ok: true };
         }
       } else if (rpc.error) {
@@ -166,13 +221,15 @@ export function WebAuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       let createdUserId: number | null = null;
-      for (let i = 0; i < 20; i++) {
-        const userId = genId();
+      const userIdsToTry = tgUser?.id ? [tgUser.id] : Array.from({ length: 20 }, () => genId());
+      for (const userId of userIdsToTry) {
         const { error: insErr } = await supabase.from('users').insert({
           user_id: userId,
-          full_name: fullName.trim(),
+          full_name: tgUser ? (`${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || fullName.trim()) : fullName.trim(),
+          username: tgUser?.username ?? null,
           email: normalizedEmail,
-          web_registered: true,
+          photo_url: tgUser?.photo_url ?? null,
+          web_registered: tgUser ? false : true,
           referrer_id: normalizedRefId,
           balance: bonus || 0,
           luck: 'default',
